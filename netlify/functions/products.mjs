@@ -28,7 +28,8 @@ function supabaseHeaders() {
   return {
     apikey: key,
     Authorization: `Bearer ${key}`,
-    "content-type": "application/json"
+    "content-type": "application/json",
+    "user-agent": "EtherealAgent/1.0"
   };
 }
 

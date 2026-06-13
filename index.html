@@ -235,7 +235,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
       </div>
       <p class="lede">Browse by mood, ingredient, texture, and daily ritual — not just by product type.</p>
     </div>
-    <div class="collection-grid">
+    <div class="collection-grid" id="collection-grid">
       <div class="coll-card coll-1">
         <div class="coll-inner">
           <h3>Heritage Soaps</h3>
@@ -454,6 +454,63 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
     .channel('products-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, function(){
       loadProducts();
+    })
+    .subscribe();
+})();
+</script>
+
+<script>
+(function(){
+  var grid = document.getElementById('collection-grid');
+
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function cardHtml(cat, posClass){
+    var style = cat.image_url
+      ? ' style="background-image:url(\'' + esc(cat.image_url) + '\');background-size:cover;background-position:center;"'
+      : '';
+    return '<div class="coll-card ' + posClass + '"' + style + '>' +
+      '<div class="coll-inner"><h3>' + esc(cat.name) + '</h3><p>' + esc(cat.description) + '</p></div>' +
+    '</div>';
+  }
+
+  function render(categories){
+    if (!categories.length) return;
+    var sorted = categories.slice().sort(function(a, b){ return (a.sort_order || 0) - (b.sort_order || 0); });
+    var html = '';
+    if (sorted[0]) html += cardHtml(sorted[0], 'coll-1');
+    if (sorted[1]) html += cardHtml(sorted[1], 'coll-2');
+    if (sorted[2] || sorted[3]){
+      html += '<div class="coll-3-4">';
+      if (sorted[2]) html += cardHtml(sorted[2], 'coll-3');
+      if (sorted[3]) html += cardHtml(sorted[3], 'coll-3');
+      html += '</div>';
+    }
+    grid.innerHTML = html;
+  }
+
+  var cfg = window.ETHEREAL_SUPABASE || {};
+  if (!cfg.url || !cfg.anonKey) return;
+
+  var client = window.supabase.createClient(cfg.url, cfg.anonKey);
+
+  function loadCategories(){
+    client.from('categories').select('*').then(function(res){
+      if (res.error || !res.data) return; // table may not exist yet - keep static fallback cards
+      render(res.data);
+    });
+  }
+
+  loadCategories();
+
+  client
+    .channel('categories-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, function(){
+      loadCategories();
     })
     .subscribe();
 })();

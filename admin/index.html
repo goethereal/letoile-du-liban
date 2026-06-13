@@ -50,6 +50,11 @@ textarea{resize:vertical;min-height:70px;}
 .actions{display:flex;gap:.5rem;}
 .status{font-size:.85rem;color:var(--muted);margin-bottom:1rem;}
 .status.error{color:#a33;}
+
+.category-edit{border:1px solid var(--border);border-radius:1rem;padding:1.25rem;margin-bottom:1rem;}
+.category-edit h3{font-size:1.25rem;color:var(--gold);margin-bottom:.75rem;}
+.category-edit .cat-status{display:none;margin:0;}
+.category-edit .form-actions{align-items:center;}
 </style>
 </head>
 <body>
@@ -98,6 +103,12 @@ textarea{resize:vertical;min-height:70px;}
     <h2>Catalog</h2>
     <p class="status" id="list-status">Loading…</p>
     <div id="product-list"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Collection Categories</h2>
+    <p class="status" id="categories-status">Loading…</p>
+    <div id="categories-list"></div>
   </div>
 </div>
 
@@ -313,6 +324,127 @@ textarea{resize:vertical;min-height:70px;}
     window.location.href = '/admin/login.html';
   });
 
+  // ---- Collection Categories ----
+  var categoriesStatus = document.getElementById('categories-status');
+  var categoriesList = document.getElementById('categories-list');
+
+  function categoryFormHtml(cat){
+    var hasImage = !!cat.image_url;
+    return '' +
+      '<div class="category-edit" data-id="' + cat.id + '">' +
+        '<h3>' + esc(cat.name) + '</h3>' +
+        '<div class="form-grid">' +
+          '<div class="field"><label>Name</label><input class="cat-name" value="' + esc(cat.name) + '"></div>' +
+          '<div class="field"><label>Sort Order</label><input class="cat-sort" type="number" step="1" value="' + (cat.sort_order != null ? cat.sort_order : 0) + '"></div>' +
+          '<div class="field full"><label>Description</label><textarea class="cat-description">' + esc(cat.description || '') + '</textarea></div>' +
+          '<div class="field full">' +
+            '<label>Category Image</label>' +
+            '<input type="file" class="cat-image-file" accept="image/jpeg,image/png,image/webp,image/gif">' +
+            '<input type="hidden" class="cat-image-url" value="' + esc(cat.image_url || '') + '">' +
+            '<img class="preview cat-image-preview" src="' + esc(cat.image_url || '') + '" style="' + (hasImage ? 'display:block;' : 'display:none;') + '">' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-sm cat-save">Save</button>' +
+          '<p class="status cat-status"></p>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderCategories(categories){
+    if (!categories.length){
+      categoriesStatus.textContent = 'No categories found.';
+      categoriesStatus.style.display = 'block';
+      categoriesList.innerHTML = '';
+      return;
+    }
+    categoriesStatus.style.display = 'none';
+    var sorted = categories.slice().sort(function(a, b){ return (a.sort_order || 0) - (b.sort_order || 0); });
+    categoriesList.innerHTML = sorted.map(categoryFormHtml).join('');
+  }
+
+  function loadCategories(){
+    client.from('categories').select('*').then(function(res){
+      if (res.error){
+        categoriesStatus.textContent = 'Categories table not set up yet. Run supabase/categories.sql in the Supabase SQL editor.';
+        categoriesStatus.className = 'status error';
+        categoriesStatus.style.display = 'block';
+        categoriesList.innerHTML = '';
+        return;
+      }
+      renderCategories(res.data || []);
+    });
+  }
+
+  categoriesList.addEventListener('change', async function(e){
+    if (!e.target.classList.contains('cat-image-file')) return;
+    var card = e.target.closest('.category-edit');
+    var file = e.target.files[0];
+    if (!file) return;
+    var statusEl = card.querySelector('.cat-status');
+    statusEl.className = 'status cat-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Uploading image…';
+    try {
+      var dataUrl = await new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      var base64 = dataUrl.split(',')[1];
+      var res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contentType: file.type, dataBase64: base64 })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      card.querySelector('.cat-image-url').value = data.url;
+      var preview = card.querySelector('.cat-image-preview');
+      preview.src = data.url;
+      preview.style.display = 'block';
+      statusEl.style.display = 'none';
+    } catch (err){
+      statusEl.className = 'status cat-status error';
+      statusEl.textContent = err.message;
+    }
+  });
+
+  categoriesList.addEventListener('click', async function(e){
+    if (!e.target.classList.contains('cat-save')) return;
+    var card = e.target.closest('.category-edit');
+    var statusEl = card.querySelector('.cat-status');
+    var payload = {
+      id: card.getAttribute('data-id'),
+      name: card.querySelector('.cat-name').value,
+      description: card.querySelector('.cat-description').value,
+      sort_order: Number(card.querySelector('.cat-sort').value) || 0,
+      image_url: card.querySelector('.cat-image-url').value || null
+    };
+    e.target.disabled = true;
+    statusEl.className = 'status cat-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Saving…';
+    try {
+      var res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error((data && (data.error || data.message)) || 'Save failed');
+      card.querySelector('h3').textContent = payload.name;
+      statusEl.textContent = 'Saved.';
+      setTimeout(function(){ statusEl.style.display = 'none'; }, 1500);
+    } catch (err){
+      statusEl.className = 'status cat-status error';
+      statusEl.textContent = err.message;
+    } finally {
+      e.target.disabled = false;
+    }
+  });
+
   // Gate: confirm session, then load
   fetch('/api/admin-session').then(function(res){ return res.json(); }).then(function(data){
     if (!data.authenticated){
@@ -327,6 +459,7 @@ textarea{resize:vertical;min-height:70px;}
     }
     client = window.supabase.createClient(cfg.url, cfg.anonKey);
     loadProducts();
+    loadCategories();
   }).catch(function(){
     window.location.href = '/admin/login.html';
   });
