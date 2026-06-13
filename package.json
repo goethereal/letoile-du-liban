@@ -1,0 +1,11 @@
+{
+  "name": "letoile-du-liban",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "L'Étoile du Liban — Khan Al Saboun distributor site, product catalog, and admin CMS",
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {}
+}

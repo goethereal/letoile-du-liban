@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — L'Étoile du Liban</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f9f6f1; --card:#fcfbf8; --text:#1f251e; --muted:#5e6354;
+  --gold:#8b744b; --gold-soft:rgba(139,116,75,0.3); --gold-pale:rgba(139,116,75,0.12);
+  --border:#d9d4c9; --cream:#f9f6f1;
+}
+body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2.25rem;margin-bottom:.25rem;}
+.sub{font-size:.7rem;font-weight:700;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:2rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:1.75rem;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+input{width:100%;padding:.85rem 1rem;border:1px solid var(--border);border-radius:.75rem;font-size:1rem;font-family:'Inter',sans-serif;background:#fff;margin-bottom:1.25rem;}
+input:focus{outline:none;border-color:var(--gold);}
+button{width:100%;padding:.9rem;border-radius:9999px;border:1px solid var(--gold);background:var(--gold);color:var(--cream);font-size:.9rem;font-weight:500;cursor:pointer;transition:background .2s;}
+button:hover{background:#796340;}
+.error{color:#a33;font-size:.85rem;margin-bottom:1rem;display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>L'Étoile du Liban</h1>
+  <div class="sub">Admin Access</div>
+  <p class="error" id="error">Incorrect password.</p>
+  <form id="login-form">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required>
+    <button type="submit">Sign In</button>
+  </form>
+</div>
+<script>
+document.getElementById('login-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var password = document.getElementById('password').value;
+  var errorEl = document.getElementById('error');
+  errorEl.style.display = 'none';
+  try {
+    var res = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password: password })
+    });
+    if (res.ok) {
+      window.location.href = '/admin/';
+    } else {
+      var data = await res.json().catch(function(){ return {}; });
+      errorEl.textContent = data.error || 'Incorrect password.';
+      errorEl.style.display = 'block';
+    }
+  } catch {
+    errorEl.textContent = 'Something went wrong. Try again.';
+    errorEl.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

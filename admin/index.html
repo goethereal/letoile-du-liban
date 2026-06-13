@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — L'Étoile du Liban</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f9f6f1; --card:#fcfbf8; --text:#1f251e; --muted:#5e6354;
+  --gold:#8b744b; --gold-soft:rgba(139,116,75,0.3); --gold-pale:rgba(139,116,75,0.12);
+  --border:#d9d4c9; --cream:#f9f6f1;
+}
+body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--text);}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:-0.02em;}
+.wrap{max-width:1100px;margin:0 auto;padding:2rem;}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;}
+.logo{font-size:1.5rem;}
+.logo-sub{display:block;font-family:'Inter',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-top:.15rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 1.5rem;height:42px;border-radius:9999px;font-size:.85rem;font-weight:500;text-decoration:none;cursor:pointer;border:1px solid var(--gold);background:var(--gold);color:var(--cream);transition:background .2s;}
+.btn:hover{background:#796340;}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--gold-soft);}
+.btn-outline:hover{border-color:var(--gold);background:none;}
+.btn-danger{border-color:#a33;background:#a33;}
+.btn-danger:hover{background:#8a2a2a;}
+.btn-sm{height:34px;padding:0 1rem;font-size:.78rem;}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.75rem;margin-bottom:2rem;}
+.panel h2{font-size:1.6rem;margin-bottom:1.25rem;}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.form-grid .full{grid-column:1/-1;}
+label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
+input,textarea{width:100%;padding:.7rem .9rem;border:1px solid var(--border);border-radius:.65rem;font-size:.95rem;font-family:'Inter',sans-serif;background:#fff;}
+input:focus,textarea:focus{outline:none;border-color:var(--gold);}
+textarea{resize:vertical;min-height:70px;}
+.field{margin-bottom:1rem;}
+.form-actions{display:flex;gap:.75rem;margin-top:.5rem;}
+.preview{width:120px;height:90px;object-fit:cover;border-radius:.65rem;border:1px solid var(--border);margin-top:.5rem;display:none;}
+
+.category-group{margin-bottom:1.5rem;}
+.category-group h3{font-size:1.25rem;color:var(--gold);margin-bottom:.75rem;}
+.product-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:.6rem;}
+.product-row .info{display:flex;align-items:center;gap:1rem;}
+.product-row img{width:56px;height:56px;object-fit:cover;border-radius:.5rem;background:var(--gold-pale);}
+.product-row .meta{font-size:.8rem;color:var(--muted);}
+.product-row .meta strong{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--text);display:block;}
+.actions{display:flex;gap:.5rem;}
+.status{font-size:.85rem;color:var(--muted);margin-bottom:1rem;}
+.status.error{color:#a33;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="logo">L'Étoile du Liban
+        <span class="logo-sub">Admin Panel</span>
+      </div>
+    </div>
+    <button class="btn btn-outline" id="logout-btn">Log Out</button>
+  </header>
+
+  <div class="panel">
+    <h2 id="form-title">Add Product</h2>
+    <p class="status error" id="form-status" style="display:none;"></p>
+    <form id="product-form">
+      <input type="hidden" id="product-id">
+      <div class="form-grid">
+        <div class="field"><label for="name">Name</label><input id="name" required></div>
+        <div class="field"><label for="price">Price (USD)</label><input id="price" type="number" step="0.01" min="0"></div>
+        <div class="field full"><label for="description">Description</label><textarea id="description" required></textarea></div>
+        <div class="field"><label for="category">Category</label><input id="category" required></div>
+        <div class="field"><label for="sort_order">Sort Order</label><input id="sort_order" type="number" step="1" value="0"></div>
+        <div class="field"><label for="category_eyebrow">Category Eyebrow (small label)</label><input id="category_eyebrow"></div>
+        <div class="field"><label for="category_description">Category Description</label><input id="category_description"></div>
+        <div class="field"><label for="size">Size</label><input id="size" placeholder="e.g. 140G or 100ML"></div>
+        <div class="field"><label for="product_tag">Product Tag</label><input id="product_tag" placeholder="e.g. Olive Leaf"></div>
+        <div class="field full"><label for="ritual_tags">Ritual Tags (comma-separated)</label><input id="ritual_tags" placeholder="purify, exfoliate, perfume, restore, nourish, strengthen"></div>
+        <div class="field full"><label for="ritual_detail">Ritual Detail</label><textarea id="ritual_detail"></textarea></div>
+        <div class="field full">
+          <label for="image_file">Product Image</label>
+          <input type="file" id="image_file" accept="image/jpeg,image/png,image/webp,image/gif">
+          <input type="hidden" id="image_url">
+          <img class="preview" id="image_preview" alt="Preview">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn" id="save-btn">Add Product</button>
+        <button type="button" class="btn btn-outline" id="cancel-btn" style="display:none;">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Catalog</h2>
+    <p class="status" id="list-status">Loading…</p>
+    <div id="product-list"></div>
+  </div>
+</div>
+
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var form = document.getElementById('product-form');
+  var formTitle = document.getElementById('form-title');
+  var formStatus = document.getElementById('form-status');
+  var saveBtn = document.getElementById('save-btn');
+  var cancelBtn = document.getElementById('cancel-btn');
+  var listStatus = document.getElementById('list-status');
+  var productList = document.getElementById('product-list');
+  var imageFile = document.getElementById('image_file');
+  var imagePreview = document.getElementById('image_preview');
+
+  var FIELDS = ['name','description','price','category','category_eyebrow','category_description','size','product_tag','ritual_detail','sort_order'];
+
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function showStatus(msg, isError){
+    formStatus.textContent = msg;
+    formStatus.className = 'status' + (isError ? ' error' : '');
+    formStatus.style.display = msg ? 'block' : 'none';
+  }
+
+  function resetForm(){
+    form.reset();
+    document.getElementById('product-id').value = '';
+    document.getElementById('image_url').value = '';
+    document.getElementById('sort_order').value = '0';
+    imagePreview.style.display = 'none';
+    formTitle.textContent = 'Add Product';
+    saveBtn.textContent = 'Add Product';
+    cancelBtn.style.display = 'none';
+    showStatus('');
+  }
+
+  function fillForm(p){
+    document.getElementById('product-id').value = p.id;
+    document.getElementById('name').value = p.name || '';
+    document.getElementById('description').value = p.description || '';
+    document.getElementById('price').value = p.price != null ? p.price : '';
+    document.getElementById('category').value = p.category || '';
+    document.getElementById('category_eyebrow').value = p.category_eyebrow || '';
+    document.getElementById('category_description').value = p.category_description || '';
+    document.getElementById('size').value = p.size || '';
+    document.getElementById('product_tag').value = p.product_tag || '';
+    document.getElementById('ritual_tags').value = (p.ritual_tags || []).join(', ');
+    document.getElementById('ritual_detail').value = p.ritual_detail || '';
+    document.getElementById('sort_order').value = p.sort_order != null ? p.sort_order : 0;
+    document.getElementById('image_url').value = p.image_url || '';
+    if (p.image_url){
+      imagePreview.src = p.image_url;
+      imagePreview.style.display = 'block';
+    } else {
+      imagePreview.style.display = 'none';
+    }
+    formTitle.textContent = 'Edit Product';
+    saveBtn.textContent = 'Save Changes';
+    cancelBtn.style.display = 'inline-flex';
+    showStatus('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cancelBtn.addEventListener('click', resetForm);
+
+  imageFile.addEventListener('change', async function(){
+    var file = imageFile.files[0];
+    if (!file) return;
+    showStatus('Uploading image…');
+    try {
+      var dataUrl = await new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      var base64 = dataUrl.split(',')[1];
+      var res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contentType: file.type, dataBase64: base64 })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      document.getElementById('image_url').value = data.url;
+      imagePreview.src = data.url;
+      imagePreview.style.display = 'block';
+      showStatus('');
+    } catch (err){
+      showStatus(err.message, true);
+    }
+  });
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var id = document.getElementById('product-id').value;
+    var payload = {};
+    FIELDS.forEach(function(f){
+      var el = document.getElementById(f);
+      var val = el.value;
+      if (f === 'price' || f === 'sort_order'){
+        payload[f] = val === '' ? null : Number(val);
+      } else {
+        payload[f] = val;
+      }
+    });
+    payload.ritual_tags = document.getElementById('ritual_tags').value
+      .split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    payload.image_url = document.getElementById('image_url').value || null;
+
+    saveBtn.disabled = true;
+    showStatus(id ? 'Saving…' : 'Adding…');
+    try {
+      if (id) payload.id = id;
+      var res = await fetch('/api/products', {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.message || 'Save failed');
+      resetForm();
+      loadProducts();
+    } catch (err){
+      showStatus(err.message, true);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  window.editProduct = function(id){
+    var p = window.__products.find(function(x){ return x.id === id; });
+    if (p) fillForm(p);
+  };
+
+  window.deleteProduct = async function(id, name){
+    if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+    try {
+      var res = await fetch('/api/products', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id: id })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+      loadProducts();
+    } catch (err){
+      alert(err.message);
+    }
+  };
+
+  function productRowHtml(p){
+    var img = p.image_url
+      ? '<img src="' + esc(p.image_url) + '" alt="">'
+      : '<div style="width:56px;height:56px;border-radius:.5rem;background:var(--gold-pale);"></div>';
+    var price = (p.price !== null && p.price !== undefined) ? '$' + Number(p.price).toFixed(2) : 'No price set';
+    return '' +
+      '<div class="product-row">' +
+        '<div class="info">' + img +
+          '<div class="meta"><strong>' + esc(p.name) + '</strong>' + esc(p.size || '') + ' · ' + price + '</div>' +
+        '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-outline btn-sm" onclick="editProduct(\'' + p.id + '\')">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteProduct(\'' + p.id + '\', ' + JSON.stringify(p.name).replace(/"/g, '&quot;') + ')">Delete</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderList(products){
+    window.__products = products;
+    if (!products.length){
+      listStatus.textContent = 'No products yet.';
+      listStatus.style.display = 'block';
+      productList.innerHTML = '';
+      return;
+    }
+    listStatus.style.display = 'none';
+    var order = [];
+    var byCategory = {};
+    products.forEach(function(p){
+      var key = p.category || 'Uncategorized';
+      if (!byCategory[key]){ byCategory[key] = []; order.push(key); }
+      byCategory[key].push(p);
+    });
+    productList.innerHTML = order.map(function(cat){
+      return '<div class="category-group"><h3>' + esc(cat) + '</h3>' +
+        byCategory[cat].map(productRowHtml).join('') + '</div>';
+    }).join('');
+  }
+
+  var client;
+  function loadProducts(){
+    client.from('products').select('*').order('sort_order', { ascending: true }).then(function(res){
+      if (res.error){
+        listStatus.textContent = 'Unable to load products.';
+        listStatus.className = 'status error';
+        listStatus.style.display = 'block';
+        return;
+      }
+      renderList(res.data || []);
+    });
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', async function(){
+    await fetch('/api/admin-logout', { method: 'POST' });
+    window.location.href = '/admin/login.html';
+  });
+
+  // Gate: confirm session, then load
+  fetch('/api/admin-session').then(function(res){ return res.json(); }).then(function(data){
+    if (!data.authenticated){
+      window.location.href = '/admin/login.html';
+      return;
+    }
+    var cfg = window.ETHEREAL_SUPABASE || {};
+    if (!cfg.url || !cfg.anonKey){
+      listStatus.textContent = 'Supabase is not configured yet.';
+      listStatus.className = 'status error';
+      return;
+    }
+    client = window.supabase.createClient(cfg.url, cfg.anonKey);
+    loadProducts();
+  }).catch(function(){
+    window.location.href = '/admin/login.html';
+  });
+})();
+</script>
+</body>
+</html>
