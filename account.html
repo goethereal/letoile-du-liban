@@ -18,64 +18,126 @@ body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;font-size:16px;line-
 h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:-0.02em;color:var(--text);}
 
 header{position:sticky;top:0;background:var(--gold);border-bottom:1px solid var(--gold);z-index:100;}
-.header-inner{max-width:1280px;margin:0 auto;padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap;}
+.header-inner{max-width:1280px;margin:0 auto;padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;letter-spacing:.01em;line-height:1.2;color:var(--cream);}
 .logo-sub{display:block;font-family:'Inter',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.18em;color:rgba(249,246,241,.75);text-transform:uppercase;margin-top:.15rem;}
-nav{display:flex;align-items:center;gap:2rem;color:var(--cream);}
+nav{display:flex;align-items:center;gap:1.5rem;}
 nav a{color:var(--cream);text-decoration:none;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;}
-nav a:hover{color:rgba(249,246,241,.7);}
+nav a:hover{opacity:.7;}
+.eth-auth-area{display:flex;align-items:center;}
+.eth-auth-btn{background:rgba(249,246,241,.15);border:1.5px solid rgba(249,246,241,.7);color:#f9f6f1;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border-radius:9999px;padding:.45rem 1.2rem;cursor:pointer;font-family:Inter,sans-serif;transition:background .2s,border-color .2s;text-decoration:none;}
+.eth-auth-btn:hover{background:rgba(249,246,241,.28);border-color:#f9f6f1;}
 
-.wrap{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem;}
-.wrap h1{font-size:2.75rem;margin-bottom:2rem;}
+.wrap{max-width:820px;margin:0 auto;padding:3rem 2rem 5rem;}
 
-.panel{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.75rem;margin-bottom:2rem;}
-.panel h2{font-size:1.6rem;margin-bottom:1.25rem;}
-.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+/* Welcome banner */
+.welcome-banner{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem;}
+.welcome-banner h1{font-size:2.5rem;margin:0;}
+.acct-badge{display:inline-flex;align-items:center;font-family:'Inter',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.3rem .85rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);}
+.acct-badge.wholesale{background:rgba(91,123,170,.12);color:#5b7baa;border-color:rgba(91,123,170,.3);}
+
+/* Panels */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.75rem 2rem;margin-bottom:2rem;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.panel-header h2{font-size:1.5rem;margin:0;}
+
+/* Forms */
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;}
 .form-grid .full{grid-column:1/-1;}
 .field{margin-bottom:0;}
 label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
-input{width:100%;padding:.7rem .9rem;border:1px solid var(--border);border-radius:.65rem;font-size:.92rem;font-family:'Inter',sans-serif;background:#fff;}
-input:focus{outline:none;border-color:var(--gold);}
+input,select{width:100%;padding:.7rem .9rem;border:1px solid var(--border);border-radius:.65rem;font-size:.9rem;font-family:'Inter',sans-serif;background:#fff;color:var(--text);}
+input:focus,select:focus{outline:none;border-color:var(--gold);}
 input:disabled{background:var(--bg);color:var(--muted);}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 1.6rem;height:46px;border-radius:9999px;font-size:.85rem;font-weight:600;letter-spacing:.05em;text-decoration:none;cursor:pointer;border:1px solid var(--gold);background:var(--gold);color:var(--cream);transition:background .2s;font-family:'Inter',sans-serif;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 1.6rem;height:44px;border-radius:9999px;font-size:.82rem;font-weight:600;letter-spacing:.06em;cursor:pointer;border:1px solid var(--gold);background:var(--gold);color:var(--cream);transition:background .2s;font-family:'Inter',sans-serif;text-decoration:none;}
 .btn:hover{background:#796340;}
-.btn-outline{background:transparent;color:var(--text);border:1px solid var(--gold-soft);}
+.btn-outline{background:transparent;color:var(--text);border-color:var(--gold-soft);}
 .btn-outline:hover{border-color:var(--gold);background:none;}
-.btn-sm{height:38px;padding:0 1.2rem;font-size:.78rem;}
-.btn:disabled{opacity:.6;cursor:not-allowed;}
+.btn-sm{height:36px;padding:0 1.1rem;font-size:.76rem;}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted);font-weight:500;}
+.btn-ghost:hover{color:var(--text);background:none;border-color:transparent;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-danger{border-color:#c53030;background:#c53030;color:#fff;}
+.btn-danger:hover{background:#a82626;}
 
-.form-actions{display:flex;align-items:center;gap:1rem;margin-top:1.25rem;}
-.status{font-size:.85rem;color:var(--muted);}
-.status.error{color:#a33;}
-.status.success{color:#3a6b3a;}
+.form-row{display:flex;align-items:center;gap:.85rem;margin-top:1.1rem;flex-wrap:wrap;}
+.msg{font-size:.82rem;color:var(--muted);}
+.msg.ok{color:#3a6b3a;}
+.msg.err{color:#a33;}
 
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);}
-.empty-state .btn{margin-top:1.25rem;}
+/* Address view/edit toggle */
+.addr-view{font-size:.9rem;line-height:1.8;color:var(--text);}
+.addr-view .addr-empty{color:var(--muted);font-style:italic;}
+.addr-edit-fields{display:none;}
+.addr-edit-fields.open{display:block;}
 
-.order-card{border:1px solid var(--border);border-radius:1.25rem;padding:1.25rem 1.5rem;margin-bottom:1rem;}
-.order-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;cursor:pointer;}
-.order-head .order-meta{font-size:.85rem;color:var(--muted);}
-.order-head .order-meta strong{color:var(--text);font-family:'Cormorant Garamond',serif;font-size:1.2rem;display:block;}
-.order-total{font-weight:600;color:var(--gold);}
-.status-badge{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.35rem .8rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);}
-.status-badge.delivered{background:rgba(58,107,58,.12);color:#3a6b3a;border-color:rgba(58,107,58,.3);}
-.status-badge.shipped{background:rgba(139,116,75,.18);}
+/* Order list */
+.orders-empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.92rem;}
+
+.order-card{border:1px solid var(--border);border-radius:1.25rem;margin-bottom:.85rem;overflow:hidden;}
+.order-summary{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:1.1rem 1.5rem;cursor:pointer;user-select:none;}
+.order-summary:hover{background:rgba(139,116,75,.04);}
+.order-num{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:400;color:var(--text);min-width:140px;}
+.order-date{font-size:.8rem;color:var(--muted);}
+.order-items-count{font-size:.8rem;color:var(--muted);}
+.order-total{font-size:.92rem;font-weight:600;color:var(--gold);margin-left:auto;}
+.status-badge{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.3rem .75rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);white-space:nowrap;}
 .status-badge.confirmed{background:rgba(91,123,170,.12);color:#5b7baa;border-color:rgba(91,123,170,.3);}
-.order-detail{display:none;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid var(--border);}
-.order-detail.open{display:block;}
-.order-item-row{display:flex;justify-content:space-between;font-size:.88rem;padding:.35rem 0;color:var(--muted);}
-.order-item-row span:first-child{color:var(--text);}
-.order-address{font-size:.85rem;color:var(--muted);margin-top:.75rem;}
-.order-detail .form-actions{margin-top:1rem;}
-.chev{font-size:.9rem;color:var(--gold);transition:transform .2s;}
-.order-head.open .chev{transform:rotate(180deg);}
+.status-badge.shipped{background:rgba(139,116,75,.18);color:#6b5630;}
+.status-badge.delivered{background:rgba(58,107,58,.12);color:#3a6b3a;border-color:rgba(58,107,58,.3);}
+.chev{font-size:.85rem;color:var(--muted);transition:transform .2s;margin-left:.35rem;}
+.order-summary.open .chev{transform:rotate(180deg);}
+
+/* Receipt */
+.receipt{display:none;border-top:1px solid var(--border);padding:1.5rem 1.75rem;}
+.receipt.open{display:block;}
+.receipt-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem;}
+.receipt-title{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400;}
+.receipt-meta{font-size:.8rem;color:var(--muted);text-align:right;}
+.receipt-table{width:100%;border-collapse:collapse;margin-bottom:1.1rem;font-size:.88rem;}
+.receipt-table th{text-align:left;font-family:'Inter',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.35rem .5rem .5rem;border-bottom:1px solid var(--border);}
+.receipt-table th:last-child,.receipt-table td:last-child{text-align:right;}
+.receipt-table td{padding:.45rem .5rem;color:var(--text);border-bottom:1px solid rgba(217,212,201,.4);}
+.receipt-table tr:last-child td{border-bottom:none;}
+.receipt-totals{margin-left:auto;width:220px;font-size:.88rem;margin-bottom:1.1rem;}
+.receipt-totals .row{display:flex;justify-content:space-between;padding:.2rem 0;}
+.receipt-totals .row.total{font-weight:600;color:var(--text);padding-top:.45rem;border-top:1px solid var(--border);margin-top:.25rem;}
+.receipt-addr{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem;}
+.receipt-addr strong{color:var(--text);}
+.receipt-actions{display:flex;gap:.75rem;flex-wrap:wrap;}
+
+/* Change password section */
+.settings-sub{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);}
+.settings-sub:first-child{margin-top:0;padding-top:0;border-top:none;}
+.settings-sub h3{font-size:1.15rem;margin-bottom:1rem;color:var(--text);}
+
+/* Logout */
+.logout-section{text-align:center;padding:1rem 0 2rem;}
+
+/* Signed-out state */
+.signed-out-card{text-align:center;padding:4rem 1rem;}
+.signed-out-card h2{font-size:1.8rem;margin-bottom:.75rem;}
+.signed-out-card p{color:var(--muted);margin-bottom:1.5rem;}
+
+/* Print styles */
+@media print{
+  header,nav,.welcome-banner,.panel:not(.printing),.logout-section,
+  .receipt-actions,.order-summary,.orders-empty{display:none!important;}
+  .panel.printing{border:none!important;padding:0!important;background:transparent!important;}
+  .receipt{display:block!important;}
+  body{background:#fff;}
+}
 
 @media(max-width:640px){
   .header-inner{padding:1rem 1.25rem;}
   .wrap{padding:2rem 1.25rem 4rem;}
-  .wrap h1{font-size:2.2rem;}
+  .welcome-banner h1{font-size:2rem;}
+  .panel{padding:1.25rem 1.25rem;}
   .form-grid{grid-template-columns:1fr;}
+  .order-summary{gap:.6rem;}
+  .order-total{margin-left:0;}
+  .receipt-totals{width:100%;}
 }
 </style>
 </head>
@@ -96,56 +158,118 @@ input:disabled{background:var(--bg);color:var(--muted);}
 </header>
 
 <div class="wrap">
-  <h1>My Account</h1>
 
-  <div class="panel" id="recovery-panel" style="display:none;">
-    <h2>Set a New Password</h2>
-    <p class="status" id="recovery-status"></p>
-    <form id="recovery-form">
-      <div class="field"><label>New Password</label><input type="password" id="recovery-password" minlength="6" required></div>
-      <div class="form-actions">
-        <button type="submit" class="btn">Update Password</button>
+  <!-- Signed-out gate -->
+  <div id="signed-out-state" style="display:none;">
+    <div class="panel">
+      <div class="signed-out-card">
+        <h2>Log in to view your account</h2>
+        <p>Sign in to manage your profile, view past orders, and reorder favorites.</p>
+        <button class="btn" id="signed-out-login">Log In / Sign Up</button>
       </div>
-    </form>
-  </div>
-
-  <div id="signed-out-state" class="panel" style="display:none;">
-    <div class="empty-state">
-      <h2>Log in to view your account</h2>
-      <p>Sign in to manage your profile, view past orders, and reorder favorites.</p>
-      <button class="btn" id="signed-out-login">Log In / Sign Up</button>
     </div>
   </div>
 
+  <!-- Password recovery panel (shown when landing from reset email) -->
+  <div class="panel" id="recovery-panel" style="display:none;">
+    <h2 style="margin-bottom:1.25rem;">Set a New Password</h2>
+    <p class="msg" id="recovery-status"></p>
+    <form id="recovery-form">
+      <div class="form-grid" style="max-width:340px;">
+        <div class="field full"><label>New Password</label><input type="password" id="recovery-password" minlength="6" required></div>
+        <div class="field full"><label>Confirm Password</label><input type="password" id="recovery-confirm" minlength="6" required></div>
+      </div>
+      <div class="form-row"><button type="submit" class="btn">Update Password</button></div>
+    </form>
+  </div>
+
+  <!-- Signed-in dashboard -->
   <div id="signed-in-state" style="display:none;">
+
+    <!-- Welcome -->
+    <div class="welcome-banner">
+      <h1 id="welcome-name">My Account</h1>
+      <span class="acct-badge" id="acct-type-badge">Retail</span>
+    </div>
+
+    <!-- Order History -->
     <div class="panel">
-      <h2>Profile</h2>
-      <p class="status" id="profile-status"></p>
-      <form id="profile-form">
+      <div class="panel-header">
+        <h2>Order History</h2>
+      </div>
+      <p class="msg" id="orders-msg">Loading…</p>
+      <div id="orders-list"></div>
+    </div>
+
+    <!-- Saved Address -->
+    <div class="panel" id="address-panel">
+      <div class="panel-header">
+        <h2>Saved Address</h2>
+        <button class="btn btn-outline btn-sm" id="addr-edit-btn">Edit</button>
+      </div>
+      <div id="addr-view" class="addr-view">
+        <span class="addr-empty">No address saved yet.</span>
+      </div>
+      <div id="addr-edit-fields" class="addr-edit-fields">
         <div class="form-grid">
-          <div class="field"><label>Full Name</label><input id="p-name"></div>
-          <div class="field"><label>Email</label><input id="p-email" disabled></div>
-          <div class="field"><label>Phone</label><input id="p-phone"></div>
-          <div class="field"><label>Country</label><input id="p-country"></div>
           <div class="field full"><label>Address Line 1</label><input id="p-address1"></div>
           <div class="field full"><label>Address Line 2</label><input id="p-address2"></div>
           <div class="field"><label>City</label><input id="p-city"></div>
           <div class="field"><label>State / Province</label><input id="p-state"></div>
           <div class="field"><label>Postal Code</label><input id="p-postal"></div>
+          <div class="field"><label>Country</label><input id="p-country"></div>
         </div>
-        <div class="form-actions">
-          <button type="submit" class="btn" id="profile-save">Save Profile</button>
+        <div class="form-row">
+          <button class="btn btn-sm" id="addr-save-btn">Save Address</button>
+          <button class="btn btn-ghost btn-sm" id="addr-cancel-btn">Cancel</button>
+          <span class="msg" id="addr-msg"></span>
         </div>
-      </form>
+      </div>
     </div>
 
+    <!-- Account Settings -->
     <div class="panel">
-      <h2>Order History</h2>
-      <p class="status" id="orders-status">Loading…</p>
-      <div id="orders-list"></div>
+      <div class="panel-header" style="margin-bottom:0;">
+        <h2>Account Settings</h2>
+      </div>
+
+      <!-- Edit Name -->
+      <div class="settings-sub">
+        <h3>Profile</h3>
+        <div class="form-grid">
+          <div class="field"><label>Full Name</label><input id="p-name"></div>
+          <div class="field"><label>Email</label><input id="p-email" disabled></div>
+          <div class="field"><label>Phone</label><input id="p-phone"></div>
+        </div>
+        <div class="form-row">
+          <button class="btn btn-sm" id="profile-save-btn">Save Profile</button>
+          <span class="msg" id="profile-msg"></span>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="settings-sub">
+        <h3>Change Password</h3>
+        <form id="change-password-form">
+          <div class="form-grid" style="max-width:420px;">
+            <div class="field"><label>New Password</label><input type="password" id="new-password" minlength="6" required></div>
+            <div class="field"><label>Confirm Password</label><input type="password" id="confirm-password" minlength="6" required></div>
+          </div>
+          <div class="form-row">
+            <button type="submit" class="btn btn-sm">Update Password</button>
+            <span class="msg" id="password-msg"></span>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Logout -->
+    <div class="logout-section">
+      <button class="btn btn-danger" id="logout-btn">Log Out</button>
+    </div>
+
+  </div><!-- /signed-in-state -->
+</div><!-- /wrap -->
 
 <script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -165,13 +289,13 @@ input:disabled{background:var(--bg);color:var(--muted);}
 
   function esc(str){
     return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
-      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
 
   var signedOutState = document.getElementById('signed-out-state');
-  var signedInState = document.getElementById('signed-in-state');
-  var recoveryPanel = document.getElementById('recovery-panel');
+  var signedInState  = document.getElementById('signed-in-state');
+  var recoveryPanel  = document.getElementById('recovery-panel');
 
   document.getElementById('signed-out-login').addEventListener('click', function(){
     if (window.EtherealAuth) window.EtherealAuth.open('login');
@@ -182,123 +306,128 @@ input:disabled{background:var(--bg);color:var(--muted);}
     recoveryPanel.style.display = 'block';
     document.getElementById('recovery-form').addEventListener('submit', async function(e){
       e.preventDefault();
-      var password = document.getElementById('recovery-password').value;
-      var statusEl = document.getElementById('recovery-status');
-      statusEl.className = 'status';
-      statusEl.textContent = 'Updating…';
-      var res = await client.auth.updateUser({ password: password });
-      if (res.error){
-        statusEl.className = 'status error';
-        statusEl.textContent = res.error.message;
-        return;
-      }
-      statusEl.className = 'status success';
-      statusEl.textContent = 'Password updated. You are now logged in.';
+      var pw  = document.getElementById('recovery-password').value;
+      var pw2 = document.getElementById('recovery-confirm').value;
+      var el  = document.getElementById('recovery-status');
+      if (pw !== pw2){ el.className = 'msg err'; el.textContent = 'Passwords do not match.'; return; }
+      el.className = 'msg'; el.textContent = 'Updating…';
+      var res = await client.auth.updateUser({ password: pw });
+      if (res.error){ el.className = 'msg err'; el.textContent = res.error.message; return; }
+      el.className = 'msg ok'; el.textContent = 'Password updated. You are now logged in.';
       setTimeout(function(){ recoveryPanel.style.display = 'none'; }, 1500);
     });
   }
 
-  // ---- Profile ----
-  var profileForm = document.getElementById('profile-form');
-  var profileStatus = document.getElementById('profile-status');
-  var profileSaveBtn = document.getElementById('profile-save');
+  // ---- Order history ----
+  var STATUS_LABELS = { pending:'Pending', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
 
-  function loadProfile(userId, email){
-    document.getElementById('p-email').value = email || '';
-    client.from('profiles').select('*').eq('id', userId).maybeSingle().then(function(res){
-      var p = res.data;
-      if (!p) return;
-      document.getElementById('p-name').value = p.full_name || '';
-      document.getElementById('p-phone').value = p.phone || '';
-      document.getElementById('p-country').value = p.country || '';
-      document.getElementById('p-address1').value = p.address_line1 || '';
-      document.getElementById('p-address2').value = p.address_line2 || '';
-      document.getElementById('p-city').value = p.city || '';
-      document.getElementById('p-state').value = p.state || '';
-      document.getElementById('p-postal').value = p.postal_code || '';
-    });
-  }
-
-  profileForm.addEventListener('submit', async function(e){
-    e.preventDefault();
-    var session = (await client.auth.getSession()).data.session;
-    if (!session) return;
-    profileSaveBtn.disabled = true;
-    profileStatus.className = 'status';
-    profileStatus.textContent = 'Saving…';
-    var res = await client.from('profiles').upsert({
-      id: session.user.id,
-      email: session.user.email,
-      full_name: document.getElementById('p-name').value.trim(),
-      phone: document.getElementById('p-phone').value.trim(),
-      country: document.getElementById('p-country').value.trim(),
-      address_line1: document.getElementById('p-address1').value.trim(),
-      address_line2: document.getElementById('p-address2').value.trim(),
-      city: document.getElementById('p-city').value.trim(),
-      state: document.getElementById('p-state').value.trim(),
-      postal_code: document.getElementById('p-postal').value.trim(),
-      updated_at: new Date().toISOString()
-    });
-    profileSaveBtn.disabled = false;
-    if (res.error){
-      profileStatus.className = 'status error';
-      profileStatus.textContent = res.error.message;
-      return;
-    }
-    profileStatus.className = 'status success';
-    profileStatus.textContent = 'Profile saved.';
-    setTimeout(function(){ profileStatus.textContent = ''; }, 2000);
-  });
-
-  // ---- Order History ----
-  var ordersStatus = document.getElementById('orders-status');
-  var ordersList = document.getElementById('orders-list');
-
-  var STATUS_LABELS = { pending: 'Pending', confirmed: 'Confirmed', shipped: 'Shipped', delivered: 'Delivered' };
-
-  function orderCardHtml(order){
-    var date = new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    var itemCount = (order.items || []).reduce(function(sum, i){ return sum + (i.qty || 0); }, 0);
+  function openPrintWindow(order){
+    var date = new Date(order.created_at).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
     var addr = order.shipping_address || {};
     var addrLines = [addr.line1, addr.line2, [addr.city, addr.state, addr.postal_code].filter(Boolean).join(', '), addr.country]
-      .filter(Boolean).map(esc).join('<br>');
-    var itemRows = (order.items || []).map(function(item){
-      return '<div class="order-item-row"><span>' + esc(item.name) + ' × ' + item.qty + '</span><span>$' + (Number(item.price || 0) * item.qty).toFixed(2) + '</span></div>';
+      .filter(Boolean).join('\n');
+    var rows = (order.items || []).map(function(item){
+      var sub = (Number(item.price || 0) * (item.qty || 1)).toFixed(2);
+      return '<tr><td>' + esc(item.name) + '</td><td style="text-align:center">' + item.qty +
+        '</td><td style="text-align:right">$' + Number(item.price || 0).toFixed(2) +
+        '</td><td style="text-align:right">$' + sub + '</td></tr>';
     }).join('');
-    return '' +
-      '<div class="order-card" data-id="' + esc(order.id) + '">' +
-        '<div class="order-head">' +
-          '<div class="order-meta"><strong>Order #' + esc(order.id.slice(0, 8).toUpperCase()) + '</strong>' + date + ' · ' + itemCount + ' item' + (itemCount === 1 ? '' : 's') + '</div>' +
-          '<span class="status-badge ' + esc(order.status) + '">' + (STATUS_LABELS[order.status] || order.status) + '</span>' +
-          '<span class="order-total">$' + Number(order.total || 0).toFixed(2) + '</span>' +
-          '<span class="chev">⌄</span>' +
-        '</div>' +
-        '<div class="order-detail">' +
-          itemRows +
-          '<div class="order-address"><strong>Shipping to:</strong><br>' + addrLines + '</div>' +
-          '<div class="form-actions"><button class="btn btn-sm reorder-btn">Reorder</button></div>' +
-        '</div>' +
-      '</div>';
+    var shipping = Number(order.shipping || 0);
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt — L\'Étoile du Liban</title>' +
+      '<style>body{font-family:Georgia,serif;max-width:540px;margin:2rem auto;color:#1f251e;font-size:14px;}' +
+      'h1{font-size:1.5rem;letter-spacing:.01em;margin-bottom:.25rem;}' +
+      '.sub{font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:#5e6354;margin-bottom:1.5rem;}' +
+      'table{width:100%;border-collapse:collapse;margin:1.25rem 0;}' +
+      'th{text-align:left;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#5e6354;border-bottom:1px solid #d9d4c9;padding:.3rem .25rem .5rem;}' +
+      'td{padding:.45rem .25rem;border-bottom:1px solid #eee;}' +
+      '.totals{width:220px;margin-left:auto;font-size:.9rem;}' +
+      '.totals .row{display:flex;justify-content:space-between;padding:.2rem 0;}' +
+      '.totals .total{font-weight:700;border-top:1px solid #d9d4c9;padding-top:.45rem;margin-top:.25rem;}' +
+      '.addr{font-size:.85rem;color:#5e6354;line-height:1.6;margin:1.25rem 0;}' +
+      '.addr b{color:#1f251e;}' +
+      '.no-print{margin-top:1.5rem;}' +
+      '@media print{.no-print{display:none;}}' +
+      '</style></head><body>' +
+      '<h1>L\'Étoile du Liban</h1>' +
+      '<div class="sub">Khan Al Saboun Distributor</div>' +
+      '<div><strong>Order #' + order.id.slice(0,8).toUpperCase() + '</strong></div>' +
+      '<div style="font-size:.85rem;color:#5e6354;">' + esc(date) + ' · Status: ' + esc(STATUS_LABELS[order.status] || order.status) + '</div>' +
+      '<table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Subtotal</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table>' +
+      '<div class="totals">' +
+        '<div class="row"><span>Subtotal</span><span>$' + Number(order.subtotal || 0).toFixed(2) + '</span></div>' +
+        '<div class="row"><span>Shipping</span><span>' + (shipping > 0 ? '$' + shipping.toFixed(2) : 'Free') + '</span></div>' +
+        '<div class="row total"><span>Total</span><span>$' + Number(order.total || 0).toFixed(2) + '</span></div>' +
+      '</div>' +
+      '<div class="addr"><b>Shipping to:</b><br>' + esc(addrLines).replace(/\n/g,'<br>') + '</div>' +
+      '<div class="no-print"><button onclick="window.print()" style="padding:.6rem 1.5rem;background:#8b744b;color:#fff;border:none;border-radius:9999px;font-size:.85rem;cursor:pointer;">Print Receipt</button></div>' +
+      '</body></html>';
+    var w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
   }
+
+  function orderCardHtml(order){
+    var date = new Date(order.created_at).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    var itemCount = (order.items || []).reduce(function(s, i){ return s + (i.qty || 0); }, 0);
+    return '<div class="order-card" data-id="' + esc(order.id) + '">' +
+      '<div class="order-summary">' +
+        '<span class="order-num">Order #' + esc(order.id.slice(0,8).toUpperCase()) + '</span>' +
+        '<span class="order-date">' + esc(date) + '</span>' +
+        '<span class="order-items-count">· ' + itemCount + ' item' + (itemCount === 1 ? '' : 's') + '</span>' +
+        '<span class="order-total">$' + Number(order.total || 0).toFixed(2) + '</span>' +
+        '<span class="status-badge ' + esc(order.status) + '">' + esc(STATUS_LABELS[order.status] || order.status) + '</span>' +
+        '<span class="chev">⌄</span>' +
+      '</div>' +
+      '<div class="receipt">' +
+        '<div class="receipt-header">' +
+          '<div class="receipt-title">Receipt</div>' +
+          '<div class="receipt-meta">Order #' + esc(order.id.slice(0,8).toUpperCase()) + '<br>' + esc(date) + '</div>' +
+        '</div>' +
+        '<table class="receipt-table">' +
+          '<thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>' +
+          '<tbody>' + (order.items || []).map(function(item){
+            return '<tr><td>' + esc(item.name) + '</td><td>' + item.qty +
+              '</td><td>$' + Number(item.price || 0).toFixed(2) +
+              '</td><td>$' + (Number(item.price || 0) * item.qty).toFixed(2) + '</td></tr>';
+          }).join('') + '</tbody>' +
+        '</table>' +
+        '<div class="receipt-totals">' +
+          '<div class="row"><span>Subtotal</span><span>$' + Number(order.subtotal || 0).toFixed(2) + '</span></div>' +
+          '<div class="row"><span>Shipping</span><span>' + (Number(order.shipping || 0) > 0 ? '$' + Number(order.shipping).toFixed(2) : 'Free') + '</span></div>' +
+          '<div class="row total"><span>Total</span><span>$' + Number(order.total || 0).toFixed(2) + '</span></div>' +
+        '</div>' +
+        (function(){
+          var addr = order.shipping_address || {};
+          var parts = [addr.line1, addr.line2, [addr.city, addr.state, addr.postal_code].filter(Boolean).join(', '), addr.country].filter(Boolean);
+          return parts.length ? '<div class="receipt-addr"><strong>Shipping to:</strong><br>' + parts.map(esc).join('<br>') + '</div>' : '';
+        })() +
+        '<div class="receipt-actions">' +
+          '<button class="btn btn-sm print-btn">Print Receipt</button>' +
+          '<button class="btn btn-outline btn-sm reorder-btn">Reorder</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  var ordersList = document.getElementById('orders-list');
+  var ordersMsg  = document.getElementById('orders-msg');
 
   function renderOrders(orders){
     if (!orders.length){
-      ordersStatus.textContent = 'You have not placed any orders yet.';
-      ordersStatus.style.display = 'block';
+      ordersMsg.textContent = 'You have not placed any orders yet.';
+      ordersMsg.style.display = 'block';
       ordersList.innerHTML = '';
       return;
     }
-    ordersStatus.style.display = 'none';
+    ordersMsg.style.display = 'none';
     ordersList.innerHTML = orders.map(orderCardHtml).join('');
   }
 
   function loadOrders(userId){
     client.from('orders').select('*').eq('user_id', userId).order('created_at', { ascending: false }).then(function(res){
       if (res.error){
-        ordersStatus.textContent = 'Unable to load order history.';
-        ordersStatus.className = 'status error';
-        ordersStatus.style.display = 'block';
-        return;
+        ordersMsg.className = 'msg err'; ordersMsg.textContent = 'Unable to load order history.'; return;
       }
       window.__orders = res.data || [];
       renderOrders(window.__orders);
@@ -308,53 +437,182 @@ input:disabled{background:var(--bg);color:var(--muted);}
   ordersList.addEventListener('click', function(e){
     var card = e.target.closest('.order-card');
     if (!card) return;
+    var order = (window.__orders || []).find(function(o){ return o.id === card.getAttribute('data-id'); });
+
+    if (e.target.classList.contains('print-btn')){
+      if (order) openPrintWindow(order);
+      return;
+    }
 
     if (e.target.classList.contains('reorder-btn')){
-      var order = (window.__orders || []).find(function(o){ return o.id === card.getAttribute('data-id'); });
       if (!order) return;
       var cart = [];
-      try {
-        var raw = localStorage.getItem(STORAGE_KEY);
-        cart = raw ? JSON.parse(raw) : [];
-      } catch (err){ cart = []; }
+      try { var raw = localStorage.getItem(STORAGE_KEY); cart = raw ? JSON.parse(raw) : []; } catch(err){ cart = []; }
       (order.items || []).forEach(function(item){
-        var existing = cart.find(function(c){ return c.id === item.id; });
-        if (existing){
-          existing.qty += item.qty;
-        } else {
-          cart.push({ id: item.id, name: item.name, price: item.price, image: item.image, qty: item.qty });
-        }
+        var ex = cart.find(function(c){ return c.id === item.id; });
+        if (ex){ ex.qty += item.qty; }
+        else { cart.push({ id:item.id, name:item.name, price:item.price, image:item.image, qty:item.qty }); }
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
       window.location.href = '/?cart=open';
       return;
     }
 
-    if (e.target.closest('.order-head')){
-      var head = card.querySelector('.order-head');
-      var detail = card.querySelector('.order-detail');
-      head.classList.toggle('open');
-      detail.classList.toggle('open');
+    if (e.target.closest('.order-summary')){
+      var summary = card.querySelector('.order-summary');
+      var receipt = card.querySelector('.receipt');
+      summary.classList.toggle('open');
+      receipt.classList.toggle('open');
     }
   });
+
+  // ---- Address ----
+  var addrView       = document.getElementById('addr-view');
+  var addrEditFields = document.getElementById('addr-edit-fields');
+  var addrEditBtn    = document.getElementById('addr-edit-btn');
+  var addrCancelBtn  = document.getElementById('addr-cancel-btn');
+  var addrSaveBtn    = document.getElementById('addr-save-btn');
+  var addrMsg        = document.getElementById('addr-msg');
+  var currentProfile = {};
+
+  function renderAddrView(p){
+    var parts = [p.address_line1, p.address_line2,
+      [p.city, p.state, p.postal_code].filter(Boolean).join(', '), p.country].filter(Boolean);
+    addrView.innerHTML = parts.length
+      ? parts.map(function(s){ return '<div>' + esc(s) + '</div>'; }).join('')
+      : '<span class="addr-empty">No address saved yet.</span>';
+  }
+
+  addrEditBtn.addEventListener('click', function(){
+    addrEditFields.classList.add('open');
+    addrEditBtn.style.display = 'none';
+    addrView.style.display = 'none';
+    document.getElementById('p-address1').value = currentProfile.address_line1 || '';
+    document.getElementById('p-address2').value = currentProfile.address_line2 || '';
+    document.getElementById('p-city').value      = currentProfile.city || '';
+    document.getElementById('p-state').value     = currentProfile.state || '';
+    document.getElementById('p-postal').value    = currentProfile.postal_code || '';
+    document.getElementById('p-country').value   = currentProfile.country || '';
+  });
+
+  addrCancelBtn.addEventListener('click', function(){
+    addrEditFields.classList.remove('open');
+    addrEditBtn.style.display = '';
+    addrView.style.display = '';
+    addrMsg.textContent = '';
+  });
+
+  addrSaveBtn.addEventListener('click', async function(){
+    var session = (await client.auth.getSession()).data.session;
+    if (!session) return;
+    addrSaveBtn.disabled = true;
+    addrMsg.className = 'msg'; addrMsg.textContent = 'Saving…';
+    var patch = {
+      id: session.user.id,
+      address_line1: document.getElementById('p-address1').value.trim(),
+      address_line2: document.getElementById('p-address2').value.trim(),
+      city:          document.getElementById('p-city').value.trim(),
+      state:         document.getElementById('p-state').value.trim(),
+      postal_code:   document.getElementById('p-postal').value.trim(),
+      country:       document.getElementById('p-country').value.trim(),
+      updated_at: new Date().toISOString()
+    };
+    var res = await client.from('profiles').upsert(patch);
+    addrSaveBtn.disabled = false;
+    if (res.error){ addrMsg.className = 'msg err'; addrMsg.textContent = res.error.message; return; }
+    Object.assign(currentProfile, patch);
+    renderAddrView(currentProfile);
+    addrEditFields.classList.remove('open');
+    addrEditBtn.style.display = '';
+    addrView.style.display = '';
+    addrMsg.textContent = '';
+  });
+
+  // ---- Profile (name / phone) ----
+  var profileSaveBtn = document.getElementById('profile-save-btn');
+  var profileMsg     = document.getElementById('profile-msg');
+
+  profileSaveBtn.addEventListener('click', async function(){
+    var session = (await client.auth.getSession()).data.session;
+    if (!session) return;
+    profileSaveBtn.disabled = true;
+    profileMsg.className = 'msg'; profileMsg.textContent = 'Saving…';
+    var patch = {
+      id:        session.user.id,
+      email:     session.user.email,
+      full_name: document.getElementById('p-name').value.trim(),
+      phone:     document.getElementById('p-phone').value.trim(),
+      updated_at: new Date().toISOString()
+    };
+    var res = await client.from('profiles').upsert(patch);
+    profileSaveBtn.disabled = false;
+    if (res.error){ profileMsg.className = 'msg err'; profileMsg.textContent = res.error.message; return; }
+    Object.assign(currentProfile, patch);
+    profileMsg.className = 'msg ok'; profileMsg.textContent = 'Saved.';
+    setTimeout(function(){ profileMsg.textContent = ''; }, 2000);
+  });
+
+  // ---- Change password ----
+  document.getElementById('change-password-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var pw  = document.getElementById('new-password').value;
+    var pw2 = document.getElementById('confirm-password').value;
+    var msg = document.getElementById('password-msg');
+    if (pw !== pw2){ msg.className = 'msg err'; msg.textContent = 'Passwords do not match.'; return; }
+    var btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Updating…';
+    var res = await client.auth.updateUser({ password: pw });
+    btn.disabled = false;
+    if (res.error){ msg.className = 'msg err'; msg.textContent = res.error.message; return; }
+    msg.className = 'msg ok'; msg.textContent = 'Password updated.';
+    e.target.reset();
+    setTimeout(function(){ msg.textContent = ''; }, 2500);
+  });
+
+  // ---- Logout ----
+  document.getElementById('logout-btn').addEventListener('click', async function(){
+    if (client) await client.auth.signOut();
+    window.location.href = '/';
+  });
+
+  // ---- Load profile ----
+  function loadProfile(userId, email){
+    document.getElementById('p-email').value = email || '';
+    client.from('profiles').select('*').eq('id', userId).maybeSingle().then(function(res){
+      var p = res.data || {};
+      currentProfile = p;
+      document.getElementById('p-name').value  = p.full_name || '';
+      document.getElementById('p-phone').value = p.phone || '';
+      renderAddrView(p);
+      // Welcome name
+      var firstName = (p.full_name || email || '').split(' ')[0];
+      document.getElementById('welcome-name').textContent = 'Welcome, ' + firstName;
+      // Account type badge
+      var badge = document.getElementById('acct-type-badge');
+      var type  = p.customer_type || 'retail';
+      badge.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+      if (type === 'wholesale'){ badge.classList.add('wholesale'); }
+      else { badge.classList.remove('wholesale'); }
+    });
+  }
 
   // ---- Gate ----
   function showSignedIn(session){
     signedOutState.style.display = 'none';
-    signedInState.style.display = 'block';
+    signedInState.style.display  = 'block';
     loadProfile(session.user.id, session.user.email);
     loadOrders(session.user.id);
   }
 
   function showSignedOut(){
-    signedInState.style.display = 'none';
+    signedInState.style.display  = 'none';
     signedOutState.style.display = 'block';
   }
 
   if (client){
     client.auth.getSession().then(function(res){
-      var session = res.data && res.data.session;
-      if (session) showSignedIn(session); else showSignedOut();
+      var s = res.data && res.data.session;
+      if (s) showSignedIn(s); else showSignedOut();
     });
     client.auth.onAuthStateChange(function(_event, session){
       if (session) showSignedIn(session); else showSignedOut();

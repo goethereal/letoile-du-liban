@@ -192,18 +192,7 @@
     var area = document.getElementById('auth-area');
     if (!area) return;
     if (session && session.user){
-      var name = (session.user.user_metadata && session.user.user_metadata.full_name) || session.user.email;
-      area.innerHTML = '' +
-        '<div class="eth-auth-account">' +
-          '<a href="/account.html">' + esc(name.split(' ')[0] || 'Account') + '</a>' +
-          '<button id="eth-logout-btn">Log Out</button>' +
-        '</div>';
-      var logoutBtn = area.querySelector('#eth-logout-btn');
-      if (logoutBtn){
-        logoutBtn.addEventListener('click', async function(){
-          await client.auth.signOut();
-        });
-      }
+      area.innerHTML = '<a class="eth-auth-btn" href="/account.html">Dashboard</a>';
     } else {
       area.innerHTML = '<button class="eth-auth-btn" id="eth-login-btn">Sign In</button>';
       area.querySelector('#eth-login-btn').addEventListener('click', function(){

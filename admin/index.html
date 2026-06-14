@@ -65,6 +65,14 @@ textarea{resize:vertical;min-height:70px;}
 .order-address{font-size:.85rem;color:var(--muted);margin:.75rem 0;}
 .status-badge{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.35rem .8rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);margin-left:.5rem;}
 .order-status-select{width:auto;padding:.45rem .6rem;font-size:.85rem;}
+
+.customer-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.85rem 1.25rem;margin-bottom:.6rem;}
+.customer-info{flex:1;min-width:180px;}
+.customer-info .name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--text);}
+.customer-info .email{font-size:.8rem;color:var(--muted);}
+.customer-type-select{width:auto;padding:.4rem .6rem;font-size:.82rem;border-radius:.5rem;}
+.type-badge{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.3rem .75rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);}
+.type-badge.wholesale{background:rgba(91,123,170,.12);color:#5b7baa;border-color:rgba(91,123,170,.3);}
 </style>
 </head>
 <body>
@@ -144,6 +152,12 @@ textarea{resize:vertical;min-height:70px;}
     <h2>Orders</h2>
     <p class="status" id="orders-status">Loading…</p>
     <div id="orders-list"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Customers</h2>
+    <p class="status" id="customers-status">Loading…</p>
+    <div id="customers-list"></div>
   </div>
 
   <div class="panel">
@@ -921,6 +935,81 @@ textarea{resize:vertical;min-height:70px;}
       });
   });
 
+  // ---- Customers ----
+  var customersStatus = document.getElementById('customers-status');
+  var customersList   = document.getElementById('customers-list');
+
+  function customerRowHtml(c){
+    var type = c.customer_type || 'retail';
+    var opts = ['retail','wholesale'].map(function(v){
+      return '<option value="' + v + '"' + (v === type ? ' selected' : '') + '>' + v.charAt(0).toUpperCase() + v.slice(1) + '</option>';
+    }).join('');
+    return '<div class="customer-row" data-id="' + esc(c.id) + '">' +
+      '<div class="customer-info">' +
+        '<div class="name">' + esc(c.full_name || '—') + '</div>' +
+        '<div class="email">' + esc(c.email || '') + '</div>' +
+      '</div>' +
+      '<select class="customer-type-select">' + opts + '</select>' +
+      '<button class="btn btn-outline btn-sm customer-type-save">Save</button>' +
+      '<p class="status cat-status" style="margin:0;display:none;"></p>' +
+    '</div>';
+  }
+
+  function renderCustomers(customers){
+    if (!customers.length){
+      customersStatus.textContent = 'No registered customers yet.';
+      customersStatus.style.display = 'block';
+      customersList.innerHTML = '';
+      return;
+    }
+    customersStatus.style.display = 'none';
+    customersList.innerHTML = customers.map(customerRowHtml).join('');
+  }
+
+  function loadCustomers(){
+    fetch('/api/customers').then(function(r){ return r.json(); }).then(function(data){
+      if (!Array.isArray(data)){
+        customersStatus.textContent = 'Unable to load customers.';
+        customersStatus.className = 'status error';
+        customersStatus.style.display = 'block';
+        return;
+      }
+      renderCustomers(data);
+    }).catch(function(){
+      customersStatus.textContent = 'Unable to load customers.';
+      customersStatus.className = 'status error';
+      customersStatus.style.display = 'block';
+    });
+  }
+
+  customersList.addEventListener('click', async function(e){
+    if (!e.target.classList.contains('customer-type-save')) return;
+    var row = e.target.closest('.customer-row');
+    var statusEl = row.querySelector('.cat-status');
+    var id   = row.getAttribute('data-id');
+    var type = row.querySelector('.customer-type-select').value;
+    e.target.disabled = true;
+    statusEl.className = 'status cat-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Saving…';
+    try {
+      var res = await fetch('/api/customers', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id: id, customer_type: type })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error((data && (data.error || data.message)) || 'Save failed');
+      statusEl.textContent = 'Saved.';
+      setTimeout(function(){ statusEl.style.display = 'none'; }, 1500);
+    } catch (err){
+      statusEl.className = 'status cat-status error';
+      statusEl.textContent = err.message;
+    } finally {
+      e.target.disabled = false;
+    }
+  });
+
   // Gate: confirm session, then load
   fetch('/api/admin-session').then(function(res){ return res.json(); }).then(function(data){
     if (!data.authenticated){
@@ -941,6 +1030,7 @@ textarea{resize:vertical;min-height:70px;}
     loadCtaContent();
     loadShippingSettings();
     loadOrders();
+    loadCustomers();
     client
       .channel('orders-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, function(){
