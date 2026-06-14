@@ -988,13 +988,6 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       return;
     }
 
-    var client = window.__supabaseClient;
-    if (!client){
-      cartStatusEl.className = 'cart-note error';
-      cartStatusEl.textContent = 'Checkout is not configured yet.';
-      return;
-    }
-
     var subtotal = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
     var shippingRate = Number(window.ETHEREAL_SHIPPING_RATE || 0);
     var shippingAddress = {
@@ -1006,18 +999,14 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     cartStatusEl.textContent = 'Placing your order…';
 
     try {
-      var sessionRes = await client.auth.getSession();
-      var session = sessionRes.data && sessionRes.data.session;
+      var client = window.__supabaseClient;
+      var session = null;
+      if (client){
+        var sessionRes = await client.auth.getSession();
+        session = sessionRes.data && sessionRes.data.session;
+      }
 
-      var orderId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (
-        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
-          var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        })
-      );
-
-      var order = {
-        id: orderId,
+      var orderPayload = {
         user_id: session ? session.user.id : null,
         customer_name: name,
         customer_email: email,
@@ -1026,14 +1015,20 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
         items: cart,
         subtotal: subtotal,
         shipping: shippingRate,
-        total: subtotal + shippingRate,
-        status: 'pending'
+        total: subtotal + shippingRate
       };
 
-      var res = await client.from('orders').insert(order);
-      if (res.error) throw new Error(res.error.message);
+      var res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unable to place order.');
 
-      if (session && document.getElementById('co-save-address').checked){
+      var orderId = data.id || '';
+
+      if (session && client && document.getElementById('co-save-address').checked){
         await client.from('profiles').upsert({
           id: session.user.id,
           full_name: name,
@@ -1056,7 +1051,7 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       checkoutPanel.style.display = 'none';
       cartCheckoutBtn.style.display = 'none';
       cartStatusEl.className = 'cart-note';
-      cartStatusEl.textContent = 'Thank you! Your order #' + orderId.slice(0, 8).toUpperCase() + ' has been placed. We will be in touch soon.';
+      cartStatusEl.textContent = 'Thank you! Your order #' + (orderId ? orderId.slice(0, 8).toUpperCase() : '—') + ' has been placed. Check your email for confirmation.';
     } catch (err){
       cartStatusEl.className = 'cart-note error';
       cartStatusEl.textContent = err.message || 'Unable to place your order. Please try again.';
