@@ -193,7 +193,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
       </div>
     </div>
     <div class="hero-art">
-      <div class="hero-image">
+      <div class="hero-image" id="hero-image">
         <div class="hero-badge">
           <span class="num">600</span>
           <span class="lbl">Years</span>
@@ -211,7 +211,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
 <!-- STORY -->
 <section class="story" id="story">
   <div class="wrap story-grid">
-    <div class="story-image"></div>
+    <div class="story-image" id="story-image"></div>
     <div class="story-text">
       <div class="eyebrow">Our Story</div>
       <h2>Born in Tripoli's ancient souks, preserved for the world.</h2>
@@ -511,6 +511,46 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
     .channel('categories-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, function(){
       loadCategories();
+    })
+    .subscribe();
+})();
+</script>
+
+<script>
+(function(){
+  var cfg = window.ETHEREAL_SUPABASE || {};
+  if (!cfg.url || !cfg.anonKey) return;
+
+  var client = window.supabase.createClient(cfg.url, cfg.anonKey);
+
+  var targets = {
+    hero_image: document.getElementById('hero-image'),
+    story_image: document.getElementById('story-image')
+  };
+
+  function applySettings(rows){
+    rows.forEach(function(row){
+      var el = targets[row.key];
+      if (!el || !row.image_url) return;
+      el.style.backgroundImage = "url('" + row.image_url.replace(/'/g, "\\'") + "')";
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+    });
+  }
+
+  function loadSettings(){
+    client.from('site_settings').select('*').then(function(res){
+      if (res.error || !res.data) return; // table may not exist yet - keep static gradients
+      applySettings(res.data);
+    });
+  }
+
+  loadSettings();
+
+  client
+    .channel('site-settings-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, function(){
+      loadSettings();
     })
     .subscribe();
 })();

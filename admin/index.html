@@ -110,6 +110,12 @@ textarea{resize:vertical;min-height:70px;}
     <p class="status" id="categories-status">Loading…</p>
     <div id="categories-list"></div>
   </div>
+
+  <div class="panel">
+    <h2>Site Images</h2>
+    <p class="status" id="site-images-status">Loading…</p>
+    <div id="site-images-list"></div>
+  </div>
 </div>
 
 <script src="/config.js"></script>
@@ -445,6 +451,128 @@ textarea{resize:vertical;min-height:70px;}
     }
   });
 
+  // ---- Site Images ----
+  var siteImagesStatus = document.getElementById('site-images-status');
+  var siteImagesList = document.getElementById('site-images-list');
+
+  var SITE_IMAGE_LABELS = {
+    hero_image: 'Hero Section Image ("600 Years" badge, right side of hero)',
+    story_image: 'Story Section Image ("Born in Tripoli\'s ancient souks")'
+  };
+
+  function siteImageHtml(setting){
+    var hasImage = !!setting.image_url;
+    return '' +
+      '<div class="category-edit" data-key="' + esc(setting.key) + '">' +
+        '<h3>' + esc(SITE_IMAGE_LABELS[setting.key] || setting.key) + '</h3>' +
+        '<div class="form-grid">' +
+          '<div class="field full">' +
+            '<label>Image</label>' +
+            '<input type="file" class="site-image-file" accept="image/jpeg,image/png,image/webp,image/gif">' +
+            '<input type="hidden" class="site-image-url" value="' + esc(setting.image_url || '') + '">' +
+            '<img class="preview site-image-preview" src="' + esc(setting.image_url || '') + '" style="' + (hasImage ? 'display:block;' : 'display:none;') + '">' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-sm site-image-save">Save</button>' +
+          '<p class="status cat-status"></p>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderSiteImages(settings){
+    if (!settings.length){
+      siteImagesStatus.textContent = 'No site images configured.';
+      siteImagesStatus.style.display = 'block';
+      siteImagesList.innerHTML = '';
+      return;
+    }
+    siteImagesStatus.style.display = 'none';
+    var order = ['hero_image', 'story_image'];
+    var byKey = {};
+    settings.forEach(function(s){ byKey[s.key] = s; });
+    siteImagesList.innerHTML = order.filter(function(k){ return byKey[k]; })
+      .map(function(k){ return siteImageHtml(byKey[k]); }).join('');
+  }
+
+  function loadSiteImages(){
+    client.from('site_settings').select('*').then(function(res){
+      if (res.error){
+        siteImagesStatus.textContent = 'Site images table not set up yet. Run supabase/site_settings.sql in the Supabase SQL editor.';
+        siteImagesStatus.className = 'status error';
+        siteImagesStatus.style.display = 'block';
+        siteImagesList.innerHTML = '';
+        return;
+      }
+      renderSiteImages(res.data || []);
+    });
+  }
+
+  siteImagesList.addEventListener('change', async function(e){
+    if (!e.target.classList.contains('site-image-file')) return;
+    var card = e.target.closest('.category-edit');
+    var file = e.target.files[0];
+    if (!file) return;
+    var statusEl = card.querySelector('.cat-status');
+    statusEl.className = 'status cat-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Uploading image…';
+    try {
+      var dataUrl = await new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      var base64 = dataUrl.split(',')[1];
+      var res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ contentType: file.type, dataBase64: base64 })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      card.querySelector('.site-image-url').value = data.url;
+      var preview = card.querySelector('.site-image-preview');
+      preview.src = data.url;
+      preview.style.display = 'block';
+      statusEl.style.display = 'none';
+    } catch (err){
+      statusEl.className = 'status cat-status error';
+      statusEl.textContent = err.message;
+    }
+  });
+
+  siteImagesList.addEventListener('click', async function(e){
+    if (!e.target.classList.contains('site-image-save')) return;
+    var card = e.target.closest('.category-edit');
+    var statusEl = card.querySelector('.cat-status');
+    var payload = {
+      key: card.getAttribute('data-key'),
+      image_url: card.querySelector('.site-image-url').value || null
+    };
+    e.target.disabled = true;
+    statusEl.className = 'status cat-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Saving…';
+    try {
+      var res = await fetch('/api/site-settings', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error((data && (data.error || data.message)) || 'Save failed');
+      statusEl.textContent = 'Saved.';
+      setTimeout(function(){ statusEl.style.display = 'none'; }, 1500);
+    } catch (err){
+      statusEl.className = 'status cat-status error';
+      statusEl.textContent = err.message;
+    } finally {
+      e.target.disabled = false;
+    }
+  });
+
   // Gate: confirm session, then load
   fetch('/api/admin-session').then(function(res){ return res.json(); }).then(function(data){
     if (!data.authenticated){
@@ -460,6 +588,7 @@ textarea{resize:vertical;min-height:70px;}
     client = window.supabase.createClient(cfg.url, cfg.anonKey);
     loadProducts();
     loadCategories();
+    loadSiteImages();
   }).catch(function(){
     window.location.href = '/admin/login.html';
   });
