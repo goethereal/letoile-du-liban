@@ -12,7 +12,8 @@ const FIELDS = [
   "product_tag",
   "ritual_tags",
   "ritual_detail",
-  "sort_order"
+  "sort_order",
+  "stock_quantity"
 ];
 
 function pickFields(body) {

@@ -30,9 +30,12 @@ header{position:sticky;top:0;background:var(--gold);border-bottom:1px solid var(
 .header-inner{max-width:1280px;margin:0 auto;padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;letter-spacing:.01em;line-height:1.2;color:var(--cream);}
 .logo-sub{display:block;font-family:'Inter',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.18em;color:rgba(249,246,241,.75);text-transform:uppercase;margin-top:.15rem;}
-nav{display:flex;gap:2.5rem;}
+nav{display:flex;align-items:center;gap:2.5rem;}
 nav a{color:var(--cream);text-decoration:none;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;}
 nav a:hover{color:rgba(249,246,241,.7);}
+.cart-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid rgba(249,246,241,.3);background:transparent;color:var(--cream);font-size:1.1rem;cursor:pointer;}
+.cart-toggle:hover{border-color:var(--cream);}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--cream);color:var(--gold);font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9999px;display:flex;align-items:center;justify-content:center;padding:0 .3rem;}
 
 /* HERO */
 .hero{padding:5rem 0;}
@@ -105,13 +108,19 @@ h2{font-size:2.75rem;line-height:1.18;margin-bottom:1rem;}
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
 .product-card{background:var(--card);border:1px solid var(--border);border-radius:1.75rem;padding:1.5rem;box-shadow:0 1px 2px rgba(0,0,0,.05);transition:all .25s;display:flex;flex-direction:column;}
 .product-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,.08);}
+.product-image-wrap{position:relative;}
 .product-image{width:100%;aspect-ratio:4/3;border-radius:1.25rem;object-fit:cover;margin-bottom:1rem;background:linear-gradient(160deg,#cdbf95 0%,#a98f5c 60%,#7a6a4b 100%);}
+.stock-badge{position:absolute;top:.75rem;right:.75rem;background:rgba(31,37,30,.85);color:var(--cream);font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.4rem .9rem;border-radius:9999px;}
+.product-card.out-of-stock .product-info{filter:grayscale(.6);opacity:.6;}
 .product-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.75rem;}
 .product-size{font-size:.7rem;font-weight:700;letter-spacing:.15em;color:var(--muted);}
 .product-tag{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);border-radius:9999px;padding:.3rem .8rem;text-align:right;white-space:nowrap;}
 .product-card h3{font-size:1.6rem;margin-bottom:.6rem;}
 .product-card p{font-size:.85rem;color:var(--muted);flex-grow:1;}
 .product-price{font-size:.85rem;font-weight:600;color:var(--gold);margin-top:.75rem;}
+.btn-add-cart{width:100%;margin-top:.9rem;border-radius:9999px;border:1px solid var(--gold);background:var(--gold);color:var(--cream);font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.75rem 1rem;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+.btn-add-cart:hover{background:#796340;}
+.btn-add-cart:disabled{background:var(--border);border-color:var(--border);color:var(--muted);cursor:not-allowed;}
 .ritual-toggle{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);margin-top:1.25rem;padding-top:1rem;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:none;border-left:none;border-right:none;border-bottom:none;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;}
 .ritual-toggle .chev{transition:transform .25s;font-size:.9rem;color:var(--gold);}
 .ritual-toggle.open .chev{transform:rotate(180deg);}
@@ -140,6 +149,31 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
 .footer-nav{display:flex;gap:2rem;}
 .footer-nav a{color:rgba(249,246,241,.85);text-decoration:none;font-size:.85rem;}
 .footer-nav a:hover{color:var(--cream);}
+
+/* CART */
+.cart-overlay{position:fixed;inset:0;background:rgba(31,37,30,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:200;}
+.cart-overlay.open{opacity:1;pointer-events:auto;}
+.cart-drawer{position:fixed;top:0;right:0;height:100%;width:400px;max-width:100%;background:var(--card);box-shadow:-12px 0 32px rgba(0,0,0,.15);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;}
+.cart-drawer.open{transform:translateX(0);}
+.cart-header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid var(--border);}
+.cart-header h3{font-size:1.5rem;}
+.cart-close{background:none;border:none;font-size:1.5rem;line-height:1;cursor:pointer;color:var(--text);}
+.cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem;}
+.cart-empty{color:var(--muted);font-size:.9rem;text-align:center;padding:2rem 0;}
+.cart-item{display:flex;gap:.9rem;padding:.9rem 0;border-bottom:1px solid var(--border);}
+.cart-item img,.cart-item .cart-item-noimg{width:64px;height:64px;border-radius:.75rem;object-fit:cover;background:var(--gold-pale);flex-shrink:0;}
+.cart-item-info{flex:1;}
+.cart-item-info h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.05rem;margin-bottom:.25rem;}
+.cart-item-price{font-size:.8rem;color:var(--muted);}
+.cart-item-controls{display:flex;align-items:center;gap:.5rem;margin-top:.5rem;}
+.cart-qty-btn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:.9rem;line-height:1;}
+.cart-qty{font-size:.85rem;font-weight:600;min-width:1.5rem;text-align:center;}
+.cart-item-subtotal{font-size:.85rem;font-weight:600;color:var(--gold);}
+.cart-remove{background:none;border:none;color:var(--muted);font-size:.75rem;text-decoration:underline;cursor:pointer;margin-left:auto;}
+.cart-footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem 1.5rem;}
+.cart-total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:600;margin-bottom:1rem;}
+.cart-note{font-size:.78rem;color:var(--muted);margin-top:.6rem;text-align:center;}
+.cart-note.error{color:#a33;}
 
 /* RESPONSIVE */
 @media(max-width:980px){
@@ -176,6 +210,9 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       <a href="#story">Story</a>
       <a href="#products">Products</a>
       <a href="#contact">Contact</a>
+      <button class="cart-toggle" id="cart-toggle" aria-label="Open cart">
+        🛒<span class="cart-count" id="cart-count" style="display:none;">0</span>
+      </button>
     </nav>
   </div>
 </header>
@@ -323,6 +360,23 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
   </div>
 </footer>
 
+<!-- CART -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Shopping cart">
+  <div class="cart-header">
+    <h3>Your Order</h3>
+    <button class="cart-close" id="cart-close" aria-label="Close cart">×</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <p class="cart-empty">Your cart is empty.</p>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total"><span>Total</span><span id="cart-total">$0.00</span></div>
+    <button class="btn btn-gold" id="cart-request" style="width:100%;">Request Order</button>
+    <p class="cart-note" id="cart-status"></p>
+  </div>
+</aside>
+
 <script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -348,17 +402,25 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     var detail = p.ritual_detail
       ? '<button class="ritual-toggle">Ritual Details<span class="chev">⌄</span></button><div class="ritual-detail">' + esc(p.ritual_detail) + '</div>'
       : '';
+    var inStock = Number(p.stock_quantity || 0) > 0;
+    var badge = inStock ? '' : '<div class="stock-badge">Out of Stock</div>';
+    var addToCart = '<button class="btn-add-cart" data-id="' + esc(p.id) + '" data-name="' + esc(p.name) + '" data-price="' + (p.price != null ? Number(p.price) : '') + '" data-image="' + esc(p.image_url || '') + '"' + (inStock ? '' : ' disabled') + '>' +
+      (inStock ? 'Add to Cart' : 'Out of Stock') +
+    '</button>';
     return '' +
-      '<article class="product-card" data-ritual="' + esc(tags) + '">' +
-        img +
-        '<div class="product-top">' +
-          '<span class="product-size">' + esc(p.size || '') + '</span>' +
-          '<span class="product-tag">' + esc(p.product_tag || '') + '</span>' +
+      '<article class="product-card' + (inStock ? '' : ' out-of-stock') + '" data-ritual="' + esc(tags) + '">' +
+        '<div class="product-image-wrap">' + img + badge + '</div>' +
+        '<div class="product-info">' +
+          '<div class="product-top">' +
+            '<span class="product-size">' + esc(p.size || '') + '</span>' +
+            '<span class="product-tag">' + esc(p.product_tag || '') + '</span>' +
+          '</div>' +
+          '<h3>' + esc(p.name) + '</h3>' +
+          '<p>' + esc(p.description) + '</p>' +
+          price +
+          addToCart +
+          detail +
         '</div>' +
-        '<h3>' + esc(p.name) + '</h3>' +
-        '<p>' + esc(p.description) + '</p>' +
-        price +
-        detail +
       '</article>';
   }
 
@@ -577,6 +639,187 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       loadSettings();
     })
     .subscribe();
+})();
+</script>
+
+<!-- CART -->
+<script>
+(function(){
+  var STORAGE_KEY = 'etoile_cart';
+
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function loadCart(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCart(cart){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }
+
+  var cart = loadCart();
+
+  var cartToggle = document.getElementById('cart-toggle');
+  var cartClose = document.getElementById('cart-close');
+  var cartOverlay = document.getElementById('cart-overlay');
+  var cartDrawer = document.getElementById('cart-drawer');
+  var cartItemsEl = document.getElementById('cart-items');
+  var cartCountEl = document.getElementById('cart-count');
+  var cartTotalEl = document.getElementById('cart-total');
+  var cartRequestBtn = document.getElementById('cart-request');
+  var cartStatusEl = document.getElementById('cart-status');
+
+  function openCart(){
+    cartDrawer.classList.add('open');
+    cartOverlay.classList.add('open');
+  }
+
+  function closeCart(){
+    cartDrawer.classList.remove('open');
+    cartOverlay.classList.remove('open');
+  }
+
+  cartToggle.addEventListener('click', openCart);
+  cartClose.addEventListener('click', closeCart);
+  cartOverlay.addEventListener('click', closeCart);
+
+  function updateCount(){
+    var count = cart.reduce(function(sum, item){ return sum + item.qty; }, 0);
+    if (count > 0){
+      cartCountEl.textContent = count;
+      cartCountEl.style.display = 'flex';
+    } else {
+      cartCountEl.style.display = 'none';
+    }
+  }
+
+  function cartItemHtml(item){
+    var img = item.image
+      ? '<img src="' + esc(item.image) + '" alt="">'
+      : '<div class="cart-item-noimg"></div>';
+    var price = Number(item.price || 0);
+    var subtotal = price * item.qty;
+    return '' +
+      '<div class="cart-item" data-id="' + esc(item.id) + '">' +
+        img +
+        '<div class="cart-item-info">' +
+          '<h4>' + esc(item.name) + '</h4>' +
+          '<div class="cart-item-price">$' + price.toFixed(2) + ' each</div>' +
+          '<div class="cart-item-controls">' +
+            '<button class="cart-qty-btn cart-qty-decrease">−</button>' +
+            '<span class="cart-qty">' + item.qty + '</span>' +
+            '<button class="cart-qty-btn cart-qty-increase">+</button>' +
+            '<span class="cart-item-subtotal">$' + subtotal.toFixed(2) + '</span>' +
+            '<button class="cart-remove">Remove</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderCart(){
+    if (!cart.length){
+      cartItemsEl.innerHTML = '<p class="cart-empty">Your cart is empty.</p>';
+    } else {
+      cartItemsEl.innerHTML = cart.map(cartItemHtml).join('');
+    }
+    var total = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
+    cartTotalEl.textContent = '$' + total.toFixed(2);
+    updateCount();
+  }
+
+  function addToCart(product){
+    var existing = cart.find(function(item){ return item.id === product.id; });
+    if (existing){
+      existing.qty += 1;
+    } else {
+      cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty: 1 });
+    }
+    saveCart(cart);
+    renderCart();
+    openCart();
+  }
+
+  // Event delegation: "Add to Cart" buttons (cards render dynamically)
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.btn-add-cart');
+    if (!btn || btn.disabled) return;
+    addToCart({
+      id: btn.getAttribute('data-id'),
+      name: btn.getAttribute('data-name'),
+      price: btn.getAttribute('data-price') === '' ? null : Number(btn.getAttribute('data-price')),
+      image: btn.getAttribute('data-image')
+    });
+  });
+
+  // Cart item controls (qty +/-, remove)
+  cartItemsEl.addEventListener('click', function(e){
+    var row = e.target.closest('.cart-item');
+    if (!row) return;
+    var id = row.getAttribute('data-id');
+    var item = cart.find(function(x){ return x.id === id; });
+    if (!item) return;
+
+    if (e.target.classList.contains('cart-qty-increase')){
+      item.qty += 1;
+    } else if (e.target.classList.contains('cart-qty-decrease')){
+      item.qty -= 1;
+      if (item.qty <= 0){
+        cart = cart.filter(function(x){ return x.id !== id; });
+      }
+    } else if (e.target.classList.contains('cart-remove')){
+      cart = cart.filter(function(x){ return x.id !== id; });
+    } else {
+      return;
+    }
+    saveCart(cart);
+    renderCart();
+  });
+
+  cartRequestBtn.addEventListener('click', function(){
+    if (!cart.length){
+      cartStatusEl.className = 'cart-note error';
+      cartStatusEl.textContent = 'Your cart is empty.';
+      return;
+    }
+    var ctaEmailLink = document.getElementById('cta-email');
+    var to = 'hello@example.com';
+    if (ctaEmailLink && ctaEmailLink.getAttribute('href')){
+      to = ctaEmailLink.getAttribute('href').replace(/^mailto:/, '');
+    }
+
+    var lines = cart.map(function(item){
+      var price = Number(item.price || 0);
+      return item.name + ' x' + item.qty + ' — $' + (price * item.qty).toFixed(2);
+    });
+    var total = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
+    lines.push('');
+    lines.push('Total: $' + total.toFixed(2));
+
+    var subject = 'Order Inquiry — L’Étoile du Liban';
+    var body = 'Hello,\n\nI would like to request availability and pricing for the following items:\n\n' +
+      lines.join('\n') +
+      '\n\nPlease let me know next steps.\n\nThank you.';
+
+    var mailtoUrl = 'mailto:' + encodeURIComponent(to) +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
+
+    window.location.href = mailtoUrl;
+
+    cartStatusEl.className = 'cart-note';
+    cartStatusEl.textContent = 'Opening your email client to send the order request…';
+  });
+
+  renderCart();
 })();
 </script>
 

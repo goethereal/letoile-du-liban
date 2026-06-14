@@ -42,15 +42,16 @@ textarea{resize:vertical;min-height:70px;}
 
 .category-group{margin-bottom:1.5rem;}
 .category-group h3{font-size:1.25rem;color:var(--gold);margin-bottom:.75rem;}
-.product-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:.6rem;}
+.product-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:.6rem;}
 .product-row .info{display:flex;align-items:center;gap:1rem;}
 .product-row img{width:56px;height:56px;object-fit:cover;border-radius:.5rem;background:var(--gold-pale);}
 .product-row .meta{font-size:.8rem;color:var(--muted);}
 .product-row .meta strong{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--text);display:block;}
-.actions{display:flex;align-items:center;gap:.5rem;}
+.actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
 .price-edit{display:flex;align-items:center;gap:.35rem;}
 .price-prefix{color:var(--muted);font-size:.85rem;}
 .price-input{width:90px;padding:.45rem .6rem;font-size:.85rem;}
+.stock-input{width:70px;padding:.45rem .6rem;font-size:.85rem;}
 .status{font-size:.85rem;color:var(--muted);margin-bottom:1rem;}
 .status.error{color:#a33;}
 
@@ -79,6 +80,7 @@ textarea{resize:vertical;min-height:70px;}
       <div class="form-grid">
         <div class="field"><label for="name">Name</label><input id="name" required></div>
         <div class="field"><label for="price">Price (USD)</label><input id="price" type="number" step="0.01" min="0"></div>
+        <div class="field"><label for="stock_quantity">Stock Quantity</label><input id="stock_quantity" type="number" step="1" min="0" value="0"></div>
         <div class="field full"><label for="description">Description</label><textarea id="description" required></textarea></div>
         <div class="field"><label for="category">Category</label><input id="category" required></div>
         <div class="field"><label for="sort_order">Sort Order</label><input id="sort_order" type="number" step="1" value="0"></div>
@@ -147,7 +149,7 @@ textarea{resize:vertical;min-height:70px;}
   var imageFile = document.getElementById('image_file');
   var imagePreview = document.getElementById('image_preview');
 
-  var FIELDS = ['name','description','price','category','category_eyebrow','category_description','size','product_tag','ritual_detail','sort_order'];
+  var FIELDS = ['name','description','price','category','category_eyebrow','category_description','size','product_tag','ritual_detail','sort_order','stock_quantity'];
 
   function esc(str){
     return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
@@ -166,6 +168,7 @@ textarea{resize:vertical;min-height:70px;}
     document.getElementById('product-id').value = '';
     document.getElementById('image_url').value = '';
     document.getElementById('sort_order').value = '0';
+    document.getElementById('stock_quantity').value = '0';
     imagePreview.style.display = 'none';
     formTitle.textContent = 'Add Product';
     saveBtn.textContent = 'Add Product';
@@ -186,6 +189,7 @@ textarea{resize:vertical;min-height:70px;}
     document.getElementById('ritual_tags').value = (p.ritual_tags || []).join(', ');
     document.getElementById('ritual_detail').value = p.ritual_detail || '';
     document.getElementById('sort_order').value = p.sort_order != null ? p.sort_order : 0;
+    document.getElementById('stock_quantity').value = p.stock_quantity != null ? p.stock_quantity : 0;
     document.getElementById('image_url').value = p.image_url || '';
     if (p.image_url){
       imagePreview.src = p.image_url;
@@ -237,7 +241,7 @@ textarea{resize:vertical;min-height:70px;}
     FIELDS.forEach(function(f){
       var el = document.getElementById(f);
       var val = el.value;
-      if (f === 'price' || f === 'sort_order'){
+      if (f === 'price' || f === 'sort_order' || f === 'stock_quantity'){
         payload[f] = val === '' ? null : Number(val);
       } else {
         payload[f] = val;
@@ -293,6 +297,7 @@ textarea{resize:vertical;min-height:70px;}
       ? '<img src="' + esc(p.image_url) + '" alt="">'
       : '<div style="width:56px;height:56px;border-radius:.5rem;background:var(--gold-pale);"></div>';
     var priceVal = (p.price !== null && p.price !== undefined) ? Number(p.price).toFixed(2) : '';
+    var stockVal = p.stock_quantity != null ? p.stock_quantity : 0;
     return '' +
       '<div class="product-row" data-id="' + p.id + '">' +
         '<div class="info">' + img +
@@ -303,6 +308,11 @@ textarea{resize:vertical;min-height:70px;}
             '<span class="price-prefix">$</span>' +
             '<input type="number" step="0.01" min="0" class="price-input" value="' + priceVal + '" placeholder="0.00">' +
             '<button class="btn btn-outline btn-sm price-save">Save</button>' +
+          '</div>' +
+          '<div class="price-edit">' +
+            '<span class="price-prefix">Stock</span>' +
+            '<input type="number" step="1" min="0" class="stock-input" value="' + stockVal + '" placeholder="0">' +
+            '<button class="btn btn-outline btn-sm stock-save">Save</button>' +
           '</div>' +
           '<button class="btn btn-outline btn-sm" onclick="editProduct(\'' + p.id + '\')">Edit</button>' +
           '<button class="btn btn-danger btn-sm" onclick="deleteProduct(\'' + p.id + '\', ' + JSON.stringify(p.name).replace(/"/g, '&quot;') + ')">Delete</button>' +
@@ -346,11 +356,19 @@ textarea{resize:vertical;min-height:70px;}
   }
 
   productList.addEventListener('click', async function(e){
-    if (!e.target.classList.contains('price-save')) return;
+    var isPrice = e.target.classList.contains('price-save');
+    var isStock = e.target.classList.contains('stock-save');
+    if (!isPrice && !isStock) return;
     var row = e.target.closest('.product-row');
     var id = row.getAttribute('data-id');
-    var input = row.querySelector('.price-input');
-    var price = input.value === '' ? null : Number(input.value);
+    var payload = { id: id };
+    if (isPrice){
+      var priceInput = row.querySelector('.price-input');
+      payload.price = priceInput.value === '' ? null : Number(priceInput.value);
+    } else {
+      var stockInput = row.querySelector('.stock-input');
+      payload.stock_quantity = stockInput.value === '' ? 0 : Number(stockInput.value);
+    }
     e.target.disabled = true;
     var original = e.target.textContent;
     e.target.textContent = 'Saving…';
@@ -358,12 +376,15 @@ textarea{resize:vertical;min-height:70px;}
       var res = await fetch('/api/products', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id: id, price: price })
+        body: JSON.stringify(payload)
       });
       var data = await res.json();
       if (!res.ok) throw new Error((data && (data.error || data.message)) || 'Save failed');
       var product = (window.__products || []).find(function(x){ return x.id === id; });
-      if (product) product.price = price;
+      if (product){
+        if (isPrice) product.price = payload.price;
+        else product.stock_quantity = payload.stock_quantity;
+      }
       e.target.textContent = 'Saved';
       setTimeout(function(){ e.target.textContent = original; }, 1200);
     } catch (err){
