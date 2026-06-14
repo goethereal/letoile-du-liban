@@ -133,6 +133,21 @@ textarea{resize:vertical;min-height:70px;}
     <p class="status" id="cta-content-status">Loading…</p>
     <div id="cta-content-list"></div>
   </div>
+
+  <div class="panel">
+    <h2>Shipping Settings</h2>
+    <p class="status" id="shipping-status">Loading…</p>
+    <div class="form-grid" id="shipping-form" style="display:none;">
+      <div class="field">
+        <label for="shipping-rate-input">Flat Rate Shipping (USD)</label>
+        <input id="shipping-rate-input" type="number" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="field" style="align-self:end;">
+        <button type="button" class="btn btn-sm" id="shipping-save">Save</button>
+        <p class="status cat-status" id="shipping-save-status"></p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="/config.js"></script>
@@ -757,6 +772,55 @@ textarea{resize:vertical;min-height:70px;}
       'Contact section content not set up yet. Run supabase/site_cta.sql in the Supabase SQL editor.');
   }
 
+  var shippingStatus = document.getElementById('shipping-status');
+  var shippingForm = document.getElementById('shipping-form');
+  var shippingInput = document.getElementById('shipping-rate-input');
+  var shippingSaveBtn = document.getElementById('shipping-save');
+  var shippingSaveStatus = document.getElementById('shipping-save-status');
+
+  function loadShippingSettings(){
+    client.from('site_settings').select('*').eq('key', 'shipping_rate').then(function(res){
+      if (res.error || !res.data || !res.data.length){
+        shippingStatus.textContent = 'Shipping rate not set up yet. Run supabase/site_shipping.sql in the Supabase SQL editor.';
+        shippingStatus.className = 'status error';
+        shippingStatus.style.display = 'block';
+        shippingForm.style.display = 'none';
+        return;
+      }
+      shippingStatus.style.display = 'none';
+      shippingForm.style.display = '';
+      shippingInput.value = res.data[0].number_value != null ? res.data[0].number_value : 0;
+    });
+  }
+
+  shippingSaveBtn.addEventListener('click', function(){
+    var value = Number(shippingInput.value);
+    if (isNaN(value) || value < 0) value = 0;
+    shippingSaveStatus.textContent = 'Saving…';
+    shippingSaveStatus.className = 'status cat-status';
+    shippingSaveStatus.style.display = '';
+    fetch('/api/site-settings', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ key: 'shipping_rate', number_value: value })
+    }).then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
+      .then(function(result){
+        if (!result.ok){
+          shippingSaveStatus.textContent = 'Error saving shipping rate.';
+          shippingSaveStatus.className = 'status error';
+          return;
+        }
+        shippingInput.value = value;
+        shippingSaveStatus.className = 'status cat-status';
+        shippingSaveStatus.textContent = 'Saved.';
+        shippingSaveStatus.style.display = '';
+        setTimeout(function(){ shippingSaveStatus.style.display = 'none'; }, 1500);
+      }).catch(function(){
+        shippingSaveStatus.textContent = 'Error saving shipping rate.';
+        shippingSaveStatus.className = 'status error';
+      });
+  });
+
   // Gate: confirm session, then load
   fetch('/api/admin-session').then(function(res){ return res.json(); }).then(function(data){
     if (!data.authenticated){
@@ -775,6 +839,7 @@ textarea{resize:vertical;min-height:70px;}
     loadSiteImages();
     loadSiteContent();
     loadCtaContent();
+    loadShippingSettings();
   }).catch(function(){
     window.location.href = '/admin/login.html';
   });

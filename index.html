@@ -151,11 +151,12 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
 .footer-nav a:hover{color:var(--cream);}
 
 /* CART */
-.cart-sparkle{position:fixed;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle, #f3e3b8 0%, var(--gold) 70%, transparent 100%);box-shadow:0 0 6px 1px rgba(139,116,75,.55);pointer-events:none;z-index:300;opacity:0;animation:cart-sparkle-fly .9s ease-out forwards;}
+.cart-sparkle{position:fixed;pointer-events:none;z-index:300;line-height:1;opacity:0;text-shadow:0 0 6px currentColor;animation:cart-sparkle-fly .9s ease-out forwards;}
 @keyframes cart-sparkle-fly{
-  0%{opacity:0;transform:translate(0,0) scale(.6);}
-  12%{opacity:1;transform:translate(0,-6px) scale(1);}
-  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3);}
+  0%{opacity:0;transform:translate(0,0) scale(.2) rotate(0deg);}
+  15%{opacity:1;transform:translate(calc(var(--dx) * 0.08), calc(var(--dy) * 0.08 - 10px)) scale(1.2) rotate(60deg);}
+  60%{opacity:1;transform:translate(calc(var(--dx) * 0.65), calc(var(--dy) * 0.6)) scale(.85) rotate(160deg);}
+  100%{opacity:0;transform:translate(var(--dx), var(--dy)) scale(.15) rotate(240deg);}
 }
 .cart-overlay{position:fixed;inset:0;background:rgba(31,37,30,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:200;}
 .cart-overlay.open{opacity:1;pointer-events:auto;}
@@ -178,7 +179,9 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
 .cart-remove{background:none;border:none;color:var(--muted);font-size:.75rem;text-decoration:underline;cursor:pointer;margin-left:auto;}
 .cart-footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem 1.5rem;}
 .cart-perk{display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.85rem;}
-.cart-total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:600;margin-bottom:1rem;}
+.cart-line{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;}
+.cart-line .free{color:var(--gold);font-weight:600;}
+.cart-total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:600;margin:.6rem 0 1rem;padding-top:.6rem;border-top:1px solid var(--border);}
 .cart-note{font-size:.78rem;color:var(--muted);margin-top:.6rem;text-align:center;}
 .cart-note.error{color:#a33;}
 
@@ -378,7 +381,9 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     <p class="cart-empty">Your cart is empty.</p>
   </div>
   <div class="cart-footer">
-    <div class="cart-perk">◆ Complimentary Shipping on This Order</div>
+    <div class="cart-perk" id="cart-perk" style="display:none;">◆ Complimentary Shipping on This Order</div>
+    <div class="cart-line"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+    <div class="cart-line"><span>Shipping</span><span id="cart-shipping">Free</span></div>
     <div class="cart-total"><span>Total</span><span id="cart-total">$0.00</span></div>
     <button class="btn btn-gold" id="cart-request" style="width:100%;">Request Order</button>
     <p class="cart-note" id="cart-status"></p>
@@ -629,6 +634,10 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
         ctaPhone.href = 'tel:' + row.text_value.replace(/[^+\d]/g, '');
         ctaPhone.textContent = '☎ ' + row.text_value;
       }
+      if (row.key === 'shipping_rate'){
+        window.ETHEREAL_SHIPPING_RATE = Number(row.number_value || 0);
+        if (typeof window.__renderCart === 'function') window.__renderCart();
+      }
     });
   }
 
@@ -682,7 +691,10 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
   var cartDrawer = document.getElementById('cart-drawer');
   var cartItemsEl = document.getElementById('cart-items');
   var cartCountEl = document.getElementById('cart-count');
+  var cartSubtotalEl = document.getElementById('cart-subtotal');
+  var cartShippingEl = document.getElementById('cart-shipping');
   var cartTotalEl = document.getElementById('cart-total');
+  var cartPerkEl = document.getElementById('cart-perk');
   var cartRequestBtn = document.getElementById('cart-request');
   var cartStatusEl = document.getElementById('cart-status');
 
@@ -739,10 +751,22 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     } else {
       cartItemsEl.innerHTML = cart.map(cartItemHtml).join('');
     }
-    var total = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
-    cartTotalEl.textContent = '$' + total.toFixed(2);
+    var subtotal = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
+    var shippingRate = Number(window.ETHEREAL_SHIPPING_RATE || 0);
+    cartSubtotalEl.textContent = '$' + subtotal.toFixed(2);
+    if (shippingRate > 0){
+      cartShippingEl.textContent = '$' + shippingRate.toFixed(2);
+      cartShippingEl.className = '';
+      cartPerkEl.style.display = 'none';
+    } else {
+      cartShippingEl.textContent = 'Free';
+      cartShippingEl.className = 'free';
+      cartPerkEl.style.display = cart.length ? 'flex' : 'none';
+    }
+    cartTotalEl.textContent = '$' + (subtotal + shippingRate).toFixed(2);
     updateCount();
   }
+  window.__renderCart = renderCart;
 
   function addToCart(product){
     var existing = cart.find(function(item){ return item.id === product.id; });
@@ -756,6 +780,9 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
   }
 
   // Sparkle/particle burst flying from the Add to Cart button to the cart icon
+  var SPARKLE_GLYPHS = ['✦', '✧', '✶'];
+  var SPARKLE_COLORS = ['#c9a84c', '#e8cc80'];
+
   function spawnSparkles(originEl){
     if (!cartToggle || !originEl) return;
     var from = originEl.getBoundingClientRect();
@@ -765,12 +792,15 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     var endX = to.left + to.width / 2;
     var endY = to.top + to.height / 2;
 
-    var count = 7;
+    var count = 8;
     for (var i = 0; i < count; i++){
       (function(i){
         var sparkle = document.createElement('div');
         sparkle.className = 'cart-sparkle';
-        var jitterX = (Math.random() - 0.5) * 40;
+        sparkle.textContent = SPARKLE_GLYPHS[i % SPARKLE_GLYPHS.length];
+        sparkle.style.color = SPARKLE_COLORS[i % SPARKLE_COLORS.length];
+        sparkle.style.fontSize = (10 + Math.random() * 10) + 'px';
+        var jitterX = (Math.random() - 0.5) * 50;
         var jitterY = (Math.random() - 0.5) * 30;
         sparkle.style.left = (startX + jitterX) + 'px';
         sparkle.style.top = (startY + jitterY) + 'px';
@@ -778,7 +808,7 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
         sparkle.style.setProperty('--dy', (endY - startY - jitterY) + 'px');
         sparkle.style.animationDelay = (i * 45) + 'ms';
         document.body.appendChild(sparkle);
-        setTimeout(function(){ sparkle.remove(); }, 900 + i * 45);
+        setTimeout(function(){ sparkle.remove(); }, 950 + i * 45);
       })(i);
     }
   }
@@ -836,9 +866,12 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       var price = Number(item.price || 0);
       return item.name + ' x' + item.qty + ' — $' + (price * item.qty).toFixed(2);
     });
-    var total = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
+    var subtotal = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
+    var shippingRate = Number(window.ETHEREAL_SHIPPING_RATE || 0);
     lines.push('');
-    lines.push('Total: $' + total.toFixed(2));
+    lines.push('Subtotal: $' + subtotal.toFixed(2));
+    lines.push('Shipping: ' + (shippingRate > 0 ? '$' + shippingRate.toFixed(2) : 'Free'));
+    lines.push('Total: $' + (subtotal + shippingRate).toFixed(2));
 
     var subject = 'Order Inquiry — L’Étoile du Liban';
     var body = 'Hello,\n\nI would like to request availability and pricing for the following items:\n\n' +

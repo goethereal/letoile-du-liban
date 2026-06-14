@@ -10,7 +10,8 @@ const ALLOWED_KEYS = [
   "cta_headline",
   "cta_description",
   "cta_email",
-  "cta_phone"
+  "cta_phone",
+  "shipping_rate"
 ];
 
 function supabaseHeaders() {
@@ -67,6 +68,7 @@ export default async (req) => {
   const update = { updated_at: new Date().toISOString() };
   if (body.image_url !== undefined) update.image_url = body.image_url || null;
   if (body.text_value !== undefined) update.text_value = body.text_value || null;
+  if (body.number_value !== undefined) update.number_value = body.number_value === null ? null : Number(body.number_value);
 
   const res = await fetch(`${baseUrl}/rest/v1/site_settings?key=eq.${encodeURIComponent(body.key)}`, {
     method: "PATCH",
