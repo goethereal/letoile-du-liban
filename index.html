@@ -151,6 +151,12 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
 .footer-nav a:hover{color:var(--cream);}
 
 /* CART */
+.cart-sparkle{position:fixed;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle, #f3e3b8 0%, var(--gold) 70%, transparent 100%);box-shadow:0 0 6px 1px rgba(139,116,75,.55);pointer-events:none;z-index:300;opacity:0;animation:cart-sparkle-fly .9s ease-out forwards;}
+@keyframes cart-sparkle-fly{
+  0%{opacity:0;transform:translate(0,0) scale(.6);}
+  12%{opacity:1;transform:translate(0,-6px) scale(1);}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3);}
+}
 .cart-overlay{position:fixed;inset:0;background:rgba(31,37,30,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:200;}
 .cart-overlay.open{opacity:1;pointer-events:auto;}
 .cart-drawer{position:fixed;top:0;right:0;height:100%;width:400px;max-width:100%;background:var(--card);box-shadow:-12px 0 32px rgba(0,0,0,.15);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;}
@@ -171,6 +177,7 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
 .cart-item-subtotal{font-size:.85rem;font-weight:600;color:var(--gold);}
 .cart-remove{background:none;border:none;color:var(--muted);font-size:.75rem;text-decoration:underline;cursor:pointer;margin-left:auto;}
 .cart-footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem 1.5rem;}
+.cart-perk{display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.85rem;}
 .cart-total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:600;margin-bottom:1rem;}
 .cart-note{font-size:.78rem;color:var(--muted);margin-top:.6rem;text-align:center;}
 .cart-note.error{color:#a33;}
@@ -371,6 +378,7 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     <p class="cart-empty">Your cart is empty.</p>
   </div>
   <div class="cart-footer">
+    <div class="cart-perk">◆ Complimentary Shipping on This Order</div>
     <div class="cart-total"><span>Total</span><span id="cart-total">$0.00</span></div>
     <button class="btn btn-gold" id="cart-request" style="width:100%;">Request Order</button>
     <p class="cart-note" id="cart-status"></p>
@@ -745,13 +753,41 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     }
     saveCart(cart);
     renderCart();
-    openCart();
+  }
+
+  // Sparkle/particle burst flying from the Add to Cart button to the cart icon
+  function spawnSparkles(originEl){
+    if (!cartToggle || !originEl) return;
+    var from = originEl.getBoundingClientRect();
+    var to = cartToggle.getBoundingClientRect();
+    var startX = from.left + from.width / 2;
+    var startY = from.top + from.height / 2;
+    var endX = to.left + to.width / 2;
+    var endY = to.top + to.height / 2;
+
+    var count = 7;
+    for (var i = 0; i < count; i++){
+      (function(i){
+        var sparkle = document.createElement('div');
+        sparkle.className = 'cart-sparkle';
+        var jitterX = (Math.random() - 0.5) * 40;
+        var jitterY = (Math.random() - 0.5) * 30;
+        sparkle.style.left = (startX + jitterX) + 'px';
+        sparkle.style.top = (startY + jitterY) + 'px';
+        sparkle.style.setProperty('--dx', (endX - startX - jitterX) + 'px');
+        sparkle.style.setProperty('--dy', (endY - startY - jitterY) + 'px');
+        sparkle.style.animationDelay = (i * 45) + 'ms';
+        document.body.appendChild(sparkle);
+        setTimeout(function(){ sparkle.remove(); }, 900 + i * 45);
+      })(i);
+    }
   }
 
   // Event delegation: "Add to Cart" buttons (cards render dynamically)
   document.addEventListener('click', function(e){
     var btn = e.target.closest('.btn-add-cart');
     if (!btn || btn.disabled) return;
+    spawnSparkles(btn);
     addToCart({
       id: btn.getAttribute('data-id'),
       name: btn.getAttribute('data-name'),
