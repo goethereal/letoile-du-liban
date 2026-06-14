@@ -13,7 +13,8 @@ const STATUS_MESSAGES = {
 
 async function send(env, { to, subject, text }) {
   const key = env.RESEND_API_KEY;
-  const from = env.RESEND_FROM || "L'Étoile du Liban <noreply@letoileduliban.shop>";
+  // Switch to "L'Étoile du Liban <orders@letoileduliban.shop>" once letoileduliban.shop is verified in the Resend dashboard
+  const from = env.RESEND_FROM || "L'Étoile du Liban <onboarding@resend.dev>";
   if (!key || !to) return { sent: false };
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
