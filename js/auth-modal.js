@@ -24,8 +24,8 @@
     '.eth-auth-close{position:absolute;top:1rem;right:1.25rem;background:none;border:none;font-size:1.4rem;line-height:1;cursor:pointer;color:#1f251e;}' +
     '.eth-auth-link{font-size:.8rem;color:#8b744b;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:Inter,sans-serif;padding:0;}' +
     '.eth-auth-area{display:flex;align-items:center;gap:.9rem;}' +
-    '.eth-auth-btn{background:none;border:1px solid rgba(249,246,241,.3);color:inherit;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border-radius:9999px;padding:.5rem 1.1rem;cursor:pointer;font-family:Inter,sans-serif;}' +
-    '.eth-auth-btn:hover{border-color:currentColor;}' +
+    '.eth-auth-btn{background:rgba(249,246,241,.15);border:1.5px solid rgba(249,246,241,.7);color:#f9f6f1;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border-radius:9999px;padding:.45rem 1.2rem;cursor:pointer;font-family:Inter,sans-serif;transition:background .2s,border-color .2s;}' +
+    '.eth-auth-btn:hover{background:rgba(249,246,241,.28);border-color:#f9f6f1;}' +
     '.eth-auth-account{display:flex;align-items:center;gap:.75rem;}' +
     '.eth-auth-account a{text-decoration:none;color:inherit;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;}' +
     '.eth-auth-account button{background:none;border:none;color:inherit;font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:underline;cursor:pointer;font-family:Inter,sans-serif;padding:0;opacity:.8;}';
@@ -44,7 +44,7 @@
   modal.innerHTML = '' +
     '<button class="eth-auth-close" id="eth-auth-close" aria-label="Close">×</button>' +
     '<div class="eth-auth-tabs">' +
-      '<button class="eth-auth-tab" data-mode="login">Log In</button>' +
+      '<button class="eth-auth-tab" data-mode="login">Sign In</button>' +
       '<button class="eth-auth-tab" data-mode="signup">Sign Up</button>' +
     '</div>' +
     '<div id="eth-auth-body"></div>';
@@ -97,7 +97,7 @@
         '<form id="eth-login-form">' +
           '<div class="eth-auth-field"><label>Email</label><input type="email" id="eth-login-email" required></div>' +
           '<div class="eth-auth-field"><label>Password</label><input type="password" id="eth-login-password" required></div>' +
-          '<button type="submit" class="eth-auth-submit">Log In</button>' +
+          '<button type="submit" class="eth-auth-submit">Sign In</button>' +
           '<p class="eth-auth-status"></p>' +
           '<p style="margin-top:.75rem;"><button type="button" class="eth-auth-link" id="eth-forgot-link">Forgot your password?</button></p>' +
         '</form>';
@@ -205,12 +205,15 @@
         });
       }
     } else {
-      area.innerHTML = '<button class="eth-auth-btn" id="eth-login-btn">Log In</button>';
+      area.innerHTML = '<button class="eth-auth-btn" id="eth-login-btn">Sign In</button>';
       area.querySelector('#eth-login-btn').addEventListener('click', function(){
         open('login');
       });
     }
   }
+
+  // Render Sign In button immediately so it's visible before async session check
+  renderHeader(null);
 
   if (client){
     client.auth.getSession().then(function(res){
