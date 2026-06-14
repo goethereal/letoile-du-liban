@@ -185,8 +185,8 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
   <div class="wrap hero-grid">
     <div>
       <div class="eyebrow">Official Distributor</div>
-      <h1>600 years of<br>Lebanese alchemy.</h1>
-      <p class="lede">Khan Al Saboun brings Tripoli's legendary soapmaking heritage into modern organic luxury — crafted with olive oil, botanicals, honey, loofah, and aromatic oils.</p>
+      <h1 id="hero-headline">600 years of<br>Lebanese alchemy.</h1>
+      <p class="lede" id="hero-description">Khan Al Saboun brings Tripoli's legendary soapmaking heritage into modern organic luxury — crafted with olive oil, botanicals, honey, loofah, and aromatic oils.</p>
       <div class="btn-row">
         <a href="#products" class="btn btn-gold">Explore the Collection</a>
         <a href="#contact" class="btn btn-outline">Request Distributor Pricing</a>
@@ -214,8 +214,8 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
     <div class="story-image" id="story-image"></div>
     <div class="story-text">
       <div class="eyebrow">Our Story</div>
-      <h2>Born in Tripoli's ancient souks, preserved for the world.</h2>
-      <p>Khan Al Saboun is a legendary Lebanese brand with over 600 years of history. Revitalized by Dr. Bader Hassoun, it preserves traditional soapmaking methods while transforming them into a global symbol of luxury, purity, and botanical care.</p>
+      <h2 id="story-headline">Born in Tripoli's ancient souks, preserved for the world.</h2>
+      <p id="story-description">Khan Al Saboun is a legendary Lebanese brand with over 600 years of history. Revitalized by Dr. Bader Hassoun, it preserves traditional soapmaking methods while transforming them into a global symbol of luxury, purity, and botanical care.</p>
       <div class="pillars">
         <div class="pillar">Olive oil heritage</div>
         <div class="pillar">Essential herbs</div>
@@ -523,18 +523,30 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
 
   var client = window.supabase.createClient(cfg.url, cfg.anonKey);
 
-  var targets = {
+  var imageTargets = {
     hero_image: document.getElementById('hero-image'),
     story_image: document.getElementById('story-image')
   };
 
+  var textTargets = {
+    hero_headline: document.getElementById('hero-headline'),
+    hero_description: document.getElementById('hero-description'),
+    story_headline: document.getElementById('story-headline'),
+    story_description: document.getElementById('story-description')
+  };
+
   function applySettings(rows){
     rows.forEach(function(row){
-      var el = targets[row.key];
-      if (!el || !row.image_url) return;
-      el.style.backgroundImage = "url('" + row.image_url.replace(/'/g, "\\'") + "')";
-      el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = 'center';
+      var imageEl = imageTargets[row.key];
+      if (imageEl && row.image_url){
+        imageEl.style.backgroundImage = "url('" + row.image_url.replace(/'/g, "\\'") + "')";
+        imageEl.style.backgroundSize = 'cover';
+        imageEl.style.backgroundPosition = 'center';
+      }
+      var textEl = textTargets[row.key];
+      if (textEl && row.text_value){
+        textEl.textContent = row.text_value;
+      }
     });
   }
 

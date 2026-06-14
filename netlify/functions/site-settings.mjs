@@ -1,6 +1,13 @@
 import { verifySession } from "../../lib/auth.mjs";
 
-const ALLOWED_KEYS = ["hero_image", "story_image"];
+const ALLOWED_KEYS = [
+  "hero_image",
+  "story_image",
+  "hero_headline",
+  "hero_description",
+  "story_headline",
+  "story_description"
+];
 
 function supabaseHeaders() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -53,10 +60,14 @@ export default async (req) => {
     });
   }
 
+  const update = { updated_at: new Date().toISOString() };
+  if (body.image_url !== undefined) update.image_url = body.image_url || null;
+  if (body.text_value !== undefined) update.text_value = body.text_value || null;
+
   const res = await fetch(`${baseUrl}/rest/v1/site_settings?key=eq.${encodeURIComponent(body.key)}`, {
     method: "PATCH",
     headers: { ...supabaseHeaders(), Prefer: "return=representation" },
-    body: JSON.stringify({ image_url: body.image_url || null, updated_at: new Date().toISOString() })
+    body: JSON.stringify(update)
   });
   const data = await res.json();
   return new Response(JSON.stringify(data), {
