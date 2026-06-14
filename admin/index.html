@@ -827,14 +827,18 @@ textarea{resize:vertical;min-height:70px;}
   }
 
   function loadOrders(){
-    client.from('orders').select('*').order('created_at', { ascending: false }).then(function(res){
-      if (res.error){
+    fetch('/api/orders').then(function(res){ return res.json(); }).then(function(data){
+      if (!Array.isArray(data)){
         ordersStatus.textContent = 'Unable to load orders.';
         ordersStatus.className = 'status error';
         ordersStatus.style.display = 'block';
         return;
       }
-      renderOrders(res.data || []);
+      renderOrders(data);
+    }).catch(function(){
+      ordersStatus.textContent = 'Unable to load orders.';
+      ordersStatus.className = 'status error';
+      ordersStatus.style.display = 'block';
     });
   }
 
