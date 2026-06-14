@@ -185,6 +185,19 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
 .cart-note{font-size:.78rem;color:var(--muted);margin-top:.6rem;text-align:center;}
 .cart-note.error{color:#a33;}
 
+/* CHECKOUT */
+.checkout-panel{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+.checkout-banner{background:var(--gold-pale);border:1px solid var(--gold-soft);border-radius:.75rem;padding:.75rem 1rem;font-size:.8rem;color:var(--text);margin-bottom:1rem;}
+.checkout-banner a,.checkout-banner button{color:var(--gold);font-weight:600;text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;font-size:inherit;padding:0;}
+.checkout-field{margin-bottom:.75rem;}
+.checkout-field label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
+.checkout-field input{width:100%;padding:.6rem .8rem;border:1px solid var(--border);border-radius:.6rem;font-size:.88rem;font-family:'Inter',sans-serif;background:#fff;}
+.checkout-field input:focus{outline:none;border-color:var(--gold);}
+.checkout-row{display:flex;gap:.6rem;}
+.checkout-row .checkout-field{flex:1;}
+.checkout-save-row{display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--muted);margin-bottom:.9rem;cursor:pointer;}
+.checkout-save-row input{width:auto;}
+
 /* RESPONSIVE */
 @media(max-width:980px){
   .hero-grid,.story-grid,.collection-grid,.contact{grid-template-columns:1fr;}
@@ -220,6 +233,7 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       <a href="#story">Story</a>
       <a href="#products">Products</a>
       <a href="#contact">Contact</a>
+      <span class="eth-auth-area" id="auth-area"></span>
       <button class="cart-toggle" id="cart-toggle" aria-label="Open cart">
         🛒<span class="cart-count" id="cart-count" style="display:none;">0</span>
       </button>
@@ -385,13 +399,47 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     <div class="cart-line"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
     <div class="cart-line"><span>Shipping</span><span id="cart-shipping">Free</span></div>
     <div class="cart-total"><span>Total</span><span id="cart-total">$0.00</span></div>
-    <button class="btn btn-gold" id="cart-request" style="width:100%;">Request Order</button>
+
+    <div class="checkout-panel" id="checkout-panel" style="display:none;">
+      <div class="checkout-banner" id="checkout-login-banner" style="display:none;">
+        Have an account? <button type="button" id="checkout-login-link">Log in</button> for faster checkout, or continue as a guest below.
+      </div>
+      <div class="checkout-field"><label>Full Name</label><input id="co-name" required></div>
+      <div class="checkout-field"><label>Email</label><input id="co-email" type="email" required></div>
+      <div class="checkout-field"><label>Phone</label><input id="co-phone"></div>
+      <div class="checkout-field"><label>Address Line 1</label><input id="co-address1" required></div>
+      <div class="checkout-field"><label>Address Line 2</label><input id="co-address2"></div>
+      <div class="checkout-row">
+        <div class="checkout-field"><label>City</label><input id="co-city" required></div>
+        <div class="checkout-field"><label>State / Province</label><input id="co-state"></div>
+      </div>
+      <div class="checkout-row">
+        <div class="checkout-field"><label>Postal Code</label><input id="co-postal" required></div>
+        <div class="checkout-field"><label>Country</label><input id="co-country" required></div>
+      </div>
+      <label class="checkout-save-row" id="checkout-save-row" style="display:none;">
+        <input type="checkbox" id="co-save-address" checked> Save this address to my profile
+      </label>
+      <button class="btn btn-gold" id="cart-place-order" style="width:100%;">Place Order</button>
+      <button class="btn btn-outline" id="cart-back-to-cart" style="width:100%;margin-top:.5rem;">Back to Cart</button>
+    </div>
+
+    <button class="btn btn-gold" id="cart-checkout-btn" style="width:100%;">Checkout</button>
     <p class="cart-note" id="cart-status"></p>
   </div>
 </aside>
 
 <script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var cfg = window.ETHEREAL_SUPABASE || {};
+  if (cfg.url && cfg.anonKey){
+    window.__supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+  }
+})();
+</script>
+<script src="/js/auth-modal.js"></script>
 <script>
 (function(){
   var galleryContent = document.getElementById('gallery-content');
@@ -695,8 +743,15 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
   var cartShippingEl = document.getElementById('cart-shipping');
   var cartTotalEl = document.getElementById('cart-total');
   var cartPerkEl = document.getElementById('cart-perk');
-  var cartRequestBtn = document.getElementById('cart-request');
   var cartStatusEl = document.getElementById('cart-status');
+  var checkoutPanel = document.getElementById('checkout-panel');
+  var cartCheckoutBtn = document.getElementById('cart-checkout-btn');
+  var checkoutLoginBanner = document.getElementById('checkout-login-banner');
+  var checkoutLoginLink = document.getElementById('checkout-login-link');
+  var saveAddressRow = document.getElementById('checkout-save-row');
+  var placeOrderBtn = document.getElementById('cart-place-order');
+  var backToCartBtn = document.getElementById('cart-back-to-cart');
+  var checkoutOpen = false;
 
   function openCart(){
     cartDrawer.classList.add('open');
@@ -764,6 +819,13 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
       cartPerkEl.style.display = cart.length ? 'flex' : 'none';
     }
     cartTotalEl.textContent = '$' + (subtotal + shippingRate).toFixed(2);
+    if (!cart.length){
+      checkoutOpen = false;
+      checkoutPanel.style.display = 'none';
+      cartCheckoutBtn.style.display = 'none';
+    } else if (!checkoutOpen){
+      cartCheckoutBtn.style.display = '';
+    }
     updateCount();
   }
   window.__renderCart = renderCart;
@@ -850,43 +912,159 @@ footer{background:var(--gold);border-top:1px solid var(--gold);padding:2.5rem 0;
     renderCart();
   });
 
-  cartRequestBtn.addEventListener('click', function(){
-    if (!cart.length){
+  function prefillCheckout(){
+    var client = window.__supabaseClient;
+    if (!client) return;
+    client.auth.getSession().then(function(res){
+      var session = res.data && res.data.session;
+      if (session && session.user){
+        checkoutLoginBanner.style.display = 'none';
+        saveAddressRow.style.display = 'flex';
+        document.getElementById('co-email').value = session.user.email || '';
+        client.from('profiles').select('*').eq('id', session.user.id).maybeSingle().then(function(pres){
+          var p = pres.data;
+          if (p){
+            document.getElementById('co-name').value = p.full_name || '';
+            document.getElementById('co-phone').value = p.phone || '';
+            document.getElementById('co-address1').value = p.address_line1 || '';
+            document.getElementById('co-address2').value = p.address_line2 || '';
+            document.getElementById('co-city').value = p.city || '';
+            document.getElementById('co-state').value = p.state || '';
+            document.getElementById('co-postal').value = p.postal_code || '';
+            document.getElementById('co-country').value = p.country || '';
+          }
+        });
+      } else {
+        checkoutLoginBanner.style.display = 'block';
+        saveAddressRow.style.display = 'none';
+      }
+    });
+  }
+
+  cartCheckoutBtn.addEventListener('click', function(){
+    if (!cart.length) return;
+    checkoutOpen = true;
+    checkoutPanel.style.display = 'block';
+    cartCheckoutBtn.style.display = 'none';
+    cartStatusEl.className = 'cart-note';
+    cartStatusEl.textContent = '';
+    prefillCheckout();
+  });
+
+  backToCartBtn.addEventListener('click', function(){
+    checkoutOpen = false;
+    checkoutPanel.style.display = 'none';
+    cartCheckoutBtn.style.display = cart.length ? '' : 'none';
+  });
+
+  checkoutLoginLink.addEventListener('click', function(){
+    if (window.EtherealAuth) window.EtherealAuth.open('login');
+  });
+
+  if (window.__supabaseClient){
+    window.__supabaseClient.auth.onAuthStateChange(function(){
+      if (checkoutOpen) prefillCheckout();
+    });
+  }
+
+  placeOrderBtn.addEventListener('click', async function(){
+    var name = document.getElementById('co-name').value.trim();
+    var email = document.getElementById('co-email').value.trim();
+    var phone = document.getElementById('co-phone').value.trim();
+    var address1 = document.getElementById('co-address1').value.trim();
+    var address2 = document.getElementById('co-address2').value.trim();
+    var city = document.getElementById('co-city').value.trim();
+    var state = document.getElementById('co-state').value.trim();
+    var postal = document.getElementById('co-postal').value.trim();
+    var country = document.getElementById('co-country').value.trim();
+
+    if (!name || !email || !address1 || !city || !postal || !country){
       cartStatusEl.className = 'cart-note error';
-      cartStatusEl.textContent = 'Your cart is empty.';
+      cartStatusEl.textContent = 'Please fill in all required fields.';
       return;
     }
-    var ctaEmailLink = document.getElementById('cta-email');
-    var to = 'hello@example.com';
-    if (ctaEmailLink && ctaEmailLink.getAttribute('href')){
-      to = ctaEmailLink.getAttribute('href').replace(/^mailto:/, '');
+
+    var client = window.__supabaseClient;
+    if (!client){
+      cartStatusEl.className = 'cart-note error';
+      cartStatusEl.textContent = 'Checkout is not configured yet.';
+      return;
     }
 
-    var lines = cart.map(function(item){
-      var price = Number(item.price || 0);
-      return item.name + ' x' + item.qty + ' — $' + (price * item.qty).toFixed(2);
-    });
     var subtotal = cart.reduce(function(sum, item){ return sum + Number(item.price || 0) * item.qty; }, 0);
     var shippingRate = Number(window.ETHEREAL_SHIPPING_RATE || 0);
-    lines.push('');
-    lines.push('Subtotal: $' + subtotal.toFixed(2));
-    lines.push('Shipping: ' + (shippingRate > 0 ? '$' + shippingRate.toFixed(2) : 'Free'));
-    lines.push('Total: $' + (subtotal + shippingRate).toFixed(2));
+    var shippingAddress = {
+      line1: address1, line2: address2, city: city, state: state, postal_code: postal, country: country
+    };
 
-    var subject = 'Order Inquiry — L’Étoile du Liban';
-    var body = 'Hello,\n\nI would like to request availability and pricing for the following items:\n\n' +
-      lines.join('\n') +
-      '\n\nPlease let me know next steps.\n\nThank you.';
-
-    var mailtoUrl = 'mailto:' + encodeURIComponent(to) +
-      '?subject=' + encodeURIComponent(subject) +
-      '&body=' + encodeURIComponent(body);
-
-    window.location.href = mailtoUrl;
-
+    placeOrderBtn.disabled = true;
     cartStatusEl.className = 'cart-note';
-    cartStatusEl.textContent = 'Opening your email client to send the order request…';
+    cartStatusEl.textContent = 'Placing your order…';
+
+    try {
+      var sessionRes = await client.auth.getSession();
+      var session = sessionRes.data && sessionRes.data.session;
+
+      var orderId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+          var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        })
+      );
+
+      var order = {
+        id: orderId,
+        user_id: session ? session.user.id : null,
+        customer_name: name,
+        customer_email: email,
+        customer_phone: phone,
+        shipping_address: shippingAddress,
+        items: cart,
+        subtotal: subtotal,
+        shipping: shippingRate,
+        total: subtotal + shippingRate,
+        status: 'pending'
+      };
+
+      var res = await client.from('orders').insert(order);
+      if (res.error) throw new Error(res.error.message);
+
+      if (session && document.getElementById('co-save-address').checked){
+        await client.from('profiles').upsert({
+          id: session.user.id,
+          full_name: name,
+          email: email,
+          phone: phone,
+          address_line1: address1,
+          address_line2: address2,
+          city: city,
+          state: state,
+          postal_code: postal,
+          country: country,
+          updated_at: new Date().toISOString()
+        });
+      }
+
+      cart = [];
+      saveCart(cart);
+      renderCart();
+      checkoutOpen = false;
+      checkoutPanel.style.display = 'none';
+      cartCheckoutBtn.style.display = 'none';
+      cartStatusEl.className = 'cart-note';
+      cartStatusEl.textContent = 'Thank you! Your order #' + orderId.slice(0, 8).toUpperCase() + ' has been placed. We will be in touch soon.';
+    } catch (err){
+      cartStatusEl.className = 'cart-note error';
+      cartStatusEl.textContent = err.message || 'Unable to place your order. Please try again.';
+    } finally {
+      placeOrderBtn.disabled = false;
+    }
   });
+
+  // Auto-open cart when redirected here from a reorder
+  if (window.location.search.indexOf('cart=open') !== -1){
+    openCart();
+  }
 
   renderCart();
 })();

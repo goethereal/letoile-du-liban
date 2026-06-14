@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — L'Étoile du Liban</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f9f6f1; --card:#fcfbf8; --text:#1f251e; --muted:#5e6354;
+  --gold:#8b744b; --gold-soft:rgba(139,116,75,0.3); --gold-pale:rgba(139,116,75,0.12);
+  --border:#d9d4c9; --cream:#f9f6f1;
+}
+body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;font-size:16px;line-height:1.7;color:var(--text);background:var(--bg);}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:-0.02em;color:var(--text);}
+
+header{position:sticky;top:0;background:var(--gold);border-bottom:1px solid var(--gold);z-index:100;}
+.header-inner{max-width:1280px;margin:0 auto;padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;letter-spacing:.01em;line-height:1.2;color:var(--cream);}
+.logo-sub{display:block;font-family:'Inter',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.18em;color:rgba(249,246,241,.75);text-transform:uppercase;margin-top:.15rem;}
+nav{display:flex;align-items:center;gap:2rem;color:var(--cream);}
+nav a{color:var(--cream);text-decoration:none;font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;}
+nav a:hover{color:rgba(249,246,241,.7);}
+
+.wrap{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem;}
+.wrap h1{font-size:2.75rem;margin-bottom:2rem;}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.75rem;margin-bottom:2rem;}
+.panel h2{font-size:1.6rem;margin-bottom:1.25rem;}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.form-grid .full{grid-column:1/-1;}
+.field{margin-bottom:0;}
+label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+input{width:100%;padding:.7rem .9rem;border:1px solid var(--border);border-radius:.65rem;font-size:.92rem;font-family:'Inter',sans-serif;background:#fff;}
+input:focus{outline:none;border-color:var(--gold);}
+input:disabled{background:var(--bg);color:var(--muted);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:0 1.6rem;height:46px;border-radius:9999px;font-size:.85rem;font-weight:600;letter-spacing:.05em;text-decoration:none;cursor:pointer;border:1px solid var(--gold);background:var(--gold);color:var(--cream);transition:background .2s;font-family:'Inter',sans-serif;}
+.btn:hover{background:#796340;}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--gold-soft);}
+.btn-outline:hover{border-color:var(--gold);background:none;}
+.btn-sm{height:38px;padding:0 1.2rem;font-size:.78rem;}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+
+.form-actions{display:flex;align-items:center;gap:1rem;margin-top:1.25rem;}
+.status{font-size:.85rem;color:var(--muted);}
+.status.error{color:#a33;}
+.status.success{color:#3a6b3a;}
+
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);}
+.empty-state .btn{margin-top:1.25rem;}
+
+.order-card{border:1px solid var(--border);border-radius:1.25rem;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.order-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;cursor:pointer;}
+.order-head .order-meta{font-size:.85rem;color:var(--muted);}
+.order-head .order-meta strong{color:var(--text);font-family:'Cormorant Garamond',serif;font-size:1.2rem;display:block;}
+.order-total{font-weight:600;color:var(--gold);}
+.status-badge{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.35rem .8rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);}
+.status-badge.delivered{background:rgba(58,107,58,.12);color:#3a6b3a;border-color:rgba(58,107,58,.3);}
+.status-badge.shipped{background:rgba(139,116,75,.18);}
+.status-badge.confirmed{background:rgba(91,123,170,.12);color:#5b7baa;border-color:rgba(91,123,170,.3);}
+.order-detail{display:none;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid var(--border);}
+.order-detail.open{display:block;}
+.order-item-row{display:flex;justify-content:space-between;font-size:.88rem;padding:.35rem 0;color:var(--muted);}
+.order-item-row span:first-child{color:var(--text);}
+.order-address{font-size:.85rem;color:var(--muted);margin-top:.75rem;}
+.order-detail .form-actions{margin-top:1rem;}
+.chev{font-size:.9rem;color:var(--gold);transition:transform .2s;}
+.order-head.open .chev{transform:rotate(180deg);}
+
+@media(max-width:640px){
+  .header-inner{padding:1rem 1.25rem;}
+  .wrap{padding:2rem 1.25rem 4rem;}
+  .wrap h1{font-size:2.2rem;}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" style="text-decoration:none;color:inherit;">
+      <div class="logo">L'Étoile du Liban
+        <span class="logo-sub">Khan Al Saboun Distributor</span>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Shop</a>
+      <span class="eth-auth-area" id="auth-area"></span>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>My Account</h1>
+
+  <div class="panel" id="recovery-panel" style="display:none;">
+    <h2>Set a New Password</h2>
+    <p class="status" id="recovery-status"></p>
+    <form id="recovery-form">
+      <div class="field"><label>New Password</label><input type="password" id="recovery-password" minlength="6" required></div>
+      <div class="form-actions">
+        <button type="submit" class="btn">Update Password</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="signed-out-state" class="panel" style="display:none;">
+    <div class="empty-state">
+      <h2>Log in to view your account</h2>
+      <p>Sign in to manage your profile, view past orders, and reorder favorites.</p>
+      <button class="btn" id="signed-out-login">Log In / Sign Up</button>
+    </div>
+  </div>
+
+  <div id="signed-in-state" style="display:none;">
+    <div class="panel">
+      <h2>Profile</h2>
+      <p class="status" id="profile-status"></p>
+      <form id="profile-form">
+        <div class="form-grid">
+          <div class="field"><label>Full Name</label><input id="p-name"></div>
+          <div class="field"><label>Email</label><input id="p-email" disabled></div>
+          <div class="field"><label>Phone</label><input id="p-phone"></div>
+          <div class="field"><label>Country</label><input id="p-country"></div>
+          <div class="field full"><label>Address Line 1</label><input id="p-address1"></div>
+          <div class="field full"><label>Address Line 2</label><input id="p-address2"></div>
+          <div class="field"><label>City</label><input id="p-city"></div>
+          <div class="field"><label>State / Province</label><input id="p-state"></div>
+          <div class="field"><label>Postal Code</label><input id="p-postal"></div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn" id="profile-save">Save Profile</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Order History</h2>
+      <p class="status" id="orders-status">Loading…</p>
+      <div id="orders-list"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var cfg = window.ETHEREAL_SUPABASE || {};
+  if (cfg.url && cfg.anonKey){
+    window.__supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+  }
+})();
+</script>
+<script src="/js/auth-modal.js"></script>
+<script>
+(function(){
+  var client = window.__supabaseClient;
+  var STORAGE_KEY = 'etoile_cart';
+
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  var signedOutState = document.getElementById('signed-out-state');
+  var signedInState = document.getElementById('signed-in-state');
+  var recoveryPanel = document.getElementById('recovery-panel');
+
+  document.getElementById('signed-out-login').addEventListener('click', function(){
+    if (window.EtherealAuth) window.EtherealAuth.open('login');
+  });
+
+  // ---- Password recovery flow ----
+  if (window.location.hash.indexOf('type=recovery') !== -1){
+    recoveryPanel.style.display = 'block';
+    document.getElementById('recovery-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      var password = document.getElementById('recovery-password').value;
+      var statusEl = document.getElementById('recovery-status');
+      statusEl.className = 'status';
+      statusEl.textContent = 'Updating…';
+      var res = await client.auth.updateUser({ password: password });
+      if (res.error){
+        statusEl.className = 'status error';
+        statusEl.textContent = res.error.message;
+        return;
+      }
+      statusEl.className = 'status success';
+      statusEl.textContent = 'Password updated. You are now logged in.';
+      setTimeout(function(){ recoveryPanel.style.display = 'none'; }, 1500);
+    });
+  }
+
+  // ---- Profile ----
+  var profileForm = document.getElementById('profile-form');
+  var profileStatus = document.getElementById('profile-status');
+  var profileSaveBtn = document.getElementById('profile-save');
+
+  function loadProfile(userId, email){
+    document.getElementById('p-email').value = email || '';
+    client.from('profiles').select('*').eq('id', userId).maybeSingle().then(function(res){
+      var p = res.data;
+      if (!p) return;
+      document.getElementById('p-name').value = p.full_name || '';
+      document.getElementById('p-phone').value = p.phone || '';
+      document.getElementById('p-country').value = p.country || '';
+      document.getElementById('p-address1').value = p.address_line1 || '';
+      document.getElementById('p-address2').value = p.address_line2 || '';
+      document.getElementById('p-city').value = p.city || '';
+      document.getElementById('p-state').value = p.state || '';
+      document.getElementById('p-postal').value = p.postal_code || '';
+    });
+  }
+
+  profileForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var session = (await client.auth.getSession()).data.session;
+    if (!session) return;
+    profileSaveBtn.disabled = true;
+    profileStatus.className = 'status';
+    profileStatus.textContent = 'Saving…';
+    var res = await client.from('profiles').upsert({
+      id: session.user.id,
+      email: session.user.email,
+      full_name: document.getElementById('p-name').value.trim(),
+      phone: document.getElementById('p-phone').value.trim(),
+      country: document.getElementById('p-country').value.trim(),
+      address_line1: document.getElementById('p-address1').value.trim(),
+      address_line2: document.getElementById('p-address2').value.trim(),
+      city: document.getElementById('p-city').value.trim(),
+      state: document.getElementById('p-state').value.trim(),
+      postal_code: document.getElementById('p-postal').value.trim(),
+      updated_at: new Date().toISOString()
+    });
+    profileSaveBtn.disabled = false;
+    if (res.error){
+      profileStatus.className = 'status error';
+      profileStatus.textContent = res.error.message;
+      return;
+    }
+    profileStatus.className = 'status success';
+    profileStatus.textContent = 'Profile saved.';
+    setTimeout(function(){ profileStatus.textContent = ''; }, 2000);
+  });
+
+  // ---- Order History ----
+  var ordersStatus = document.getElementById('orders-status');
+  var ordersList = document.getElementById('orders-list');
+
+  var STATUS_LABELS = { pending: 'Pending', confirmed: 'Confirmed', shipped: 'Shipped', delivered: 'Delivered' };
+
+  function orderCardHtml(order){
+    var date = new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    var itemCount = (order.items || []).reduce(function(sum, i){ return sum + (i.qty || 0); }, 0);
+    var addr = order.shipping_address || {};
+    var addrLines = [addr.line1, addr.line2, [addr.city, addr.state, addr.postal_code].filter(Boolean).join(', '), addr.country]
+      .filter(Boolean).map(esc).join('<br>');
+    var itemRows = (order.items || []).map(function(item){
+      return '<div class="order-item-row"><span>' + esc(item.name) + ' × ' + item.qty + '</span><span>$' + (Number(item.price || 0) * item.qty).toFixed(2) + '</span></div>';
+    }).join('');
+    return '' +
+      '<div class="order-card" data-id="' + esc(order.id) + '">' +
+        '<div class="order-head">' +
+          '<div class="order-meta"><strong>Order #' + esc(order.id.slice(0, 8).toUpperCase()) + '</strong>' + date + ' · ' + itemCount + ' item' + (itemCount === 1 ? '' : 's') + '</div>' +
+          '<span class="status-badge ' + esc(order.status) + '">' + (STATUS_LABELS[order.status] || order.status) + '</span>' +
+          '<span class="order-total">$' + Number(order.total || 0).toFixed(2) + '</span>' +
+          '<span class="chev">⌄</span>' +
+        '</div>' +
+        '<div class="order-detail">' +
+          itemRows +
+          '<div class="order-address"><strong>Shipping to:</strong><br>' + addrLines + '</div>' +
+          '<div class="form-actions"><button class="btn btn-sm reorder-btn">Reorder</button></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderOrders(orders){
+    if (!orders.length){
+      ordersStatus.textContent = 'You have not placed any orders yet.';
+      ordersStatus.style.display = 'block';
+      ordersList.innerHTML = '';
+      return;
+    }
+    ordersStatus.style.display = 'none';
+    ordersList.innerHTML = orders.map(orderCardHtml).join('');
+  }
+
+  function loadOrders(userId){
+    client.from('orders').select('*').eq('user_id', userId).order('created_at', { ascending: false }).then(function(res){
+      if (res.error){
+        ordersStatus.textContent = 'Unable to load order history.';
+        ordersStatus.className = 'status error';
+        ordersStatus.style.display = 'block';
+        return;
+      }
+      window.__orders = res.data || [];
+      renderOrders(window.__orders);
+    });
+  }
+
+  ordersList.addEventListener('click', function(e){
+    var card = e.target.closest('.order-card');
+    if (!card) return;
+
+    if (e.target.classList.contains('reorder-btn')){
+      var order = (window.__orders || []).find(function(o){ return o.id === card.getAttribute('data-id'); });
+      if (!order) return;
+      var cart = [];
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        cart = raw ? JSON.parse(raw) : [];
+      } catch (err){ cart = []; }
+      (order.items || []).forEach(function(item){
+        var existing = cart.find(function(c){ return c.id === item.id; });
+        if (existing){
+          existing.qty += item.qty;
+        } else {
+          cart.push({ id: item.id, name: item.name, price: item.price, image: item.image, qty: item.qty });
+        }
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+      window.location.href = '/?cart=open';
+      return;
+    }
+
+    if (e.target.closest('.order-head')){
+      var head = card.querySelector('.order-head');
+      var detail = card.querySelector('.order-detail');
+      head.classList.toggle('open');
+      detail.classList.toggle('open');
+    }
+  });
+
+  // ---- Gate ----
+  function showSignedIn(session){
+    signedOutState.style.display = 'none';
+    signedInState.style.display = 'block';
+    loadProfile(session.user.id, session.user.email);
+    loadOrders(session.user.id);
+  }
+
+  function showSignedOut(){
+    signedInState.style.display = 'none';
+    signedOutState.style.display = 'block';
+  }
+
+  if (client){
+    client.auth.getSession().then(function(res){
+      var session = res.data && res.data.session;
+      if (session) showSignedIn(session); else showSignedOut();
+    });
+    client.auth.onAuthStateChange(function(_event, session){
+      if (session) showSignedIn(session); else showSignedOut();
+    });
+  } else {
+    showSignedOut();
+  }
+})();
+</script>
+</body>
+</html>

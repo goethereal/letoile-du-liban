@@ -59,6 +59,12 @@ textarea{resize:vertical;min-height:70px;}
 .category-edit h3{font-size:1.25rem;color:var(--gold);margin-bottom:.75rem;}
 .category-edit .cat-status{display:none;margin:0;}
 .category-edit .form-actions{align-items:center;}
+
+.order-item-row{font-size:.85rem;color:var(--text);padding:.15rem 0;}
+.order-meta{font-size:.85rem;color:var(--muted);margin-bottom:.75rem;}
+.order-address{font-size:.85rem;color:var(--muted);margin:.75rem 0;}
+.status-badge{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.35rem .8rem;border-radius:9999px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-soft);margin-left:.5rem;}
+.order-status-select{width:auto;padding:.45rem .6rem;font-size:.85rem;}
 </style>
 </head>
 <body>
@@ -132,6 +138,12 @@ textarea{resize:vertical;min-height:70px;}
     <h2>Contact Section</h2>
     <p class="status" id="cta-content-status">Loading…</p>
     <div id="cta-content-list"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Orders</h2>
+    <p class="status" id="orders-status">Loading…</p>
+    <div id="orders-list"></div>
   </div>
 
   <div class="panel">
@@ -772,6 +784,90 @@ textarea{resize:vertical;min-height:70px;}
       'Contact section content not set up yet. Run supabase/site_cta.sql in the Supabase SQL editor.');
   }
 
+  // ---- Orders ----
+  var ordersStatus = document.getElementById('orders-status');
+  var ordersList = document.getElementById('orders-list');
+  var STATUS_OPTIONS = ['pending', 'confirmed', 'shipped', 'delivered'];
+
+  function orderRowHtml(o){
+    var date = new Date(o.created_at).toLocaleString();
+    var itemsHtml = (o.items || []).map(function(item){
+      return '<div class="order-item-row">' + esc(item.name) + ' × ' + item.qty + ' — $' + (Number(item.price || 0) * item.qty).toFixed(2) + '</div>';
+    }).join('');
+    var addr = o.shipping_address || {};
+    var addrText = [addr.line1, addr.line2, [addr.city, addr.state, addr.postal_code].filter(Boolean).join(', '), addr.country]
+      .filter(Boolean).map(esc).join('<br>');
+    var options = STATUS_OPTIONS.map(function(s){
+      return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+    }).join('');
+    return '' +
+      '<div class="category-edit" data-id="' + o.id + '">' +
+        '<h3>Order #' + o.id.slice(0, 8).toUpperCase() + ' — $' + Number(o.total || 0).toFixed(2) +
+          '<span class="status-badge">' + (o.status || 'pending') + '</span></h3>' +
+        '<div class="order-meta">' + esc(date) + ' · ' + esc(o.customer_name || '') + ' · ' + esc(o.customer_email || '') + (o.customer_phone ? ' · ' + esc(o.customer_phone) : '') + '</div>' +
+        '<div>' + itemsHtml + '</div>' +
+        '<div class="order-address"><strong>Ship to:</strong><br>' + addrText + '</div>' +
+        '<div class="form-actions">' +
+          '<select class="order-status-select">' + options + '</select>' +
+          '<button type="button" class="btn btn-sm order-status-save">Update Status</button>' +
+          '<p class="status cat-status"></p>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderOrders(orders){
+    if (!orders.length){
+      ordersStatus.textContent = 'No orders yet.';
+      ordersStatus.style.display = 'block';
+      ordersList.innerHTML = '';
+      return;
+    }
+    ordersStatus.style.display = 'none';
+    ordersList.innerHTML = orders.map(orderRowHtml).join('');
+  }
+
+  function loadOrders(){
+    client.from('orders').select('*').order('created_at', { ascending: false }).then(function(res){
+      if (res.error){
+        ordersStatus.textContent = 'Unable to load orders.';
+        ordersStatus.className = 'status error';
+        ordersStatus.style.display = 'block';
+        return;
+      }
+      renderOrders(res.data || []);
+    });
+  }
+
+  ordersList.addEventListener('click', async function(e){
+    if (!e.target.classList.contains('order-status-save')) return;
+    var card = e.target.closest('.category-edit');
+    var statusEl = card.querySelector('.cat-status');
+    var id = card.getAttribute('data-id');
+    var status = card.querySelector('.order-status-select').value;
+    e.target.disabled = true;
+    statusEl.className = 'status cat-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Saving…';
+    try {
+      var res = await fetch('/api/order-status', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id: id, status: status })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error((data && (data.error || data.message)) || 'Update failed');
+      statusEl.textContent = 'Saved. Customer notified by email.';
+      setTimeout(function(){ statusEl.style.display = 'none'; }, 2000);
+      var badge = card.querySelector('.status-badge');
+      if (badge) badge.textContent = status;
+    } catch (err){
+      statusEl.className = 'status cat-status error';
+      statusEl.textContent = err.message;
+    } finally {
+      e.target.disabled = false;
+    }
+  });
+
   var shippingStatus = document.getElementById('shipping-status');
   var shippingForm = document.getElementById('shipping-form');
   var shippingInput = document.getElementById('shipping-rate-input');
@@ -840,6 +936,13 @@ textarea{resize:vertical;min-height:70px;}
     loadSiteContent();
     loadCtaContent();
     loadShippingSettings();
+    loadOrders();
+    client
+      .channel('orders-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, function(){
+        loadOrders();
+      })
+      .subscribe();
   }).catch(function(){
     window.location.href = '/admin/login.html';
   });
