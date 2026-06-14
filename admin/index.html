@@ -125,6 +125,12 @@ textarea{resize:vertical;min-height:70px;}
     <p class="status" id="site-content-status">Loading…</p>
     <div id="site-content-list"></div>
   </div>
+
+  <div class="panel">
+    <h2>Contact Section</h2>
+    <p class="status" id="cta-content-status">Loading…</p>
+    <div id="cta-content-list"></div>
+  </div>
 </div>
 
 <script src="/config.js"></script>
@@ -616,19 +622,25 @@ textarea{resize:vertical;min-height:70px;}
     }
   });
 
-  // ---- Site Content ----
-  var siteContentStatus = document.getElementById('site-content-status');
-  var siteContentList = document.getElementById('site-content-list');
-
+  // ---- Site Content (text settings, shared by Site Content + Contact Section) ----
   var SITE_CONTENT_FIELDS = {
     hero_headline: { label: 'Hero Headline', type: 'input' },
     hero_description: { label: 'Hero Description', type: 'textarea' },
     story_headline: { label: 'Story Headline', type: 'input' },
     story_description: { label: 'Story Description', type: 'textarea' }
   };
+  var SITE_CONTENT_ORDER = ['hero_headline', 'hero_description', 'story_headline', 'story_description'];
 
-  function siteContentHtml(setting){
-    var field = SITE_CONTENT_FIELDS[setting.key] || { label: setting.key, type: 'textarea' };
+  var CTA_CONTENT_FIELDS = {
+    cta_headline: { label: 'Headline', type: 'input' },
+    cta_description: { label: 'Description', type: 'textarea' },
+    cta_email: { label: 'Email Address', type: 'input' },
+    cta_phone: { label: 'Phone Number', type: 'input' }
+  };
+  var CTA_CONTENT_ORDER = ['cta_headline', 'cta_description', 'cta_email', 'cta_phone'];
+
+  function textSettingHtml(setting, fieldsMap){
+    var field = fieldsMap[setting.key] || { label: setting.key, type: 'textarea' };
     var value = esc(setting.text_value || '');
     var control = field.type === 'textarea'
       ? '<textarea class="site-content-value">' + value + '</textarea>'
@@ -646,36 +658,35 @@ textarea{resize:vertical;min-height:70px;}
       '</div>';
   }
 
-  function renderSiteContent(settings){
+  function renderTextSettings(settings, fieldsMap, order, listEl, statusEl, emptyMsg){
     if (!settings.length){
-      siteContentStatus.textContent = 'No site content found.';
-      siteContentStatus.style.display = 'block';
-      siteContentList.innerHTML = '';
+      statusEl.textContent = emptyMsg;
+      statusEl.style.display = 'block';
+      listEl.innerHTML = '';
       return;
     }
-    siteContentStatus.style.display = 'none';
-    var order = ['hero_headline', 'hero_description', 'story_headline', 'story_description'];
+    statusEl.style.display = 'none';
     var byKey = {};
     settings.forEach(function(s){ byKey[s.key] = s; });
-    siteContentList.innerHTML = order.filter(function(k){ return byKey[k]; })
-      .map(function(k){ return siteContentHtml(byKey[k]); }).join('');
+    listEl.innerHTML = order.filter(function(k){ return byKey[k]; })
+      .map(function(k){ return textSettingHtml(byKey[k], fieldsMap); }).join('');
   }
 
-  function loadSiteContent(){
+  function loadTextSettings(fieldsMap, order, listEl, statusEl, emptyMsg, errorMsg){
     client.from('site_settings').select('*').then(function(res){
       if (res.error){
-        siteContentStatus.textContent = 'Site content columns not set up yet. Run supabase/site_content.sql in the Supabase SQL editor.';
-        siteContentStatus.className = 'status error';
-        siteContentStatus.style.display = 'block';
-        siteContentList.innerHTML = '';
+        statusEl.textContent = errorMsg;
+        statusEl.className = 'status error';
+        statusEl.style.display = 'block';
+        listEl.innerHTML = '';
         return;
       }
-      var rows = (res.data || []).filter(function(s){ return SITE_CONTENT_FIELDS[s.key]; });
-      renderSiteContent(rows);
+      var rows = (res.data || []).filter(function(s){ return fieldsMap[s.key]; });
+      renderTextSettings(rows, fieldsMap, order, listEl, statusEl, emptyMsg);
     });
   }
 
-  siteContentList.addEventListener('click', async function(e){
+  async function handleTextSettingSave(e){
     if (!e.target.classList.contains('site-content-save')) return;
     var card = e.target.closest('.category-edit');
     var statusEl = card.querySelector('.cat-status');
@@ -703,7 +714,27 @@ textarea{resize:vertical;min-height:70px;}
     } finally {
       e.target.disabled = false;
     }
-  });
+  }
+
+  var siteContentStatus = document.getElementById('site-content-status');
+  var siteContentList = document.getElementById('site-content-list');
+  siteContentList.addEventListener('click', handleTextSettingSave);
+
+  function loadSiteContent(){
+    loadTextSettings(SITE_CONTENT_FIELDS, SITE_CONTENT_ORDER, siteContentList, siteContentStatus,
+      'No site content found.',
+      'Site content columns not set up yet. Run supabase/site_content.sql in the Supabase SQL editor.');
+  }
+
+  var ctaContentStatus = document.getElementById('cta-content-status');
+  var ctaContentList = document.getElementById('cta-content-list');
+  ctaContentList.addEventListener('click', handleTextSettingSave);
+
+  function loadCtaContent(){
+    loadTextSettings(CTA_CONTENT_FIELDS, CTA_CONTENT_ORDER, ctaContentList, ctaContentStatus,
+      'No contact section content found.',
+      'Contact section content not set up yet. Run supabase/site_cta.sql in the Supabase SQL editor.');
+  }
 
   // Gate: confirm session, then load
   fetch('/api/admin-session').then(function(res){ return res.json(); }).then(function(data){
@@ -722,6 +753,7 @@ textarea{resize:vertical;min-height:70px;}
     loadCategories();
     loadSiteImages();
     loadSiteContent();
+    loadCtaContent();
   }).catch(function(){
     window.location.href = '/admin/login.html';
   });

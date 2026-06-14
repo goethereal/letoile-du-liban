@@ -295,13 +295,13 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
     <div class="contact">
       <div>
         <div class="contact-badge">Official Distributor Access</div>
-        <h2>Bring Khan Al Saboun rituals to your customers.</h2>
-        <p>For retail, spa, boutique, gifting, and wholesale inquiries, request availability, pricing, and curated product recommendations.</p>
+        <h2 id="cta-headline">Bring Khan Al Saboun rituals to your customers.</h2>
+        <p id="cta-description">For retail, spa, boutique, gifting, and wholesale inquiries, request availability, pricing, and curated product recommendations.</p>
       </div>
       <div class="contact-card">
         <div class="label">Start a Conversation</div>
-        <a href="mailto:hello@example.com" class="contact-link solid">✉ Email Sales Team</a>
-        <a href="tel:+13133123706" class="contact-link outline">☎ +1 (313) 312-3706</a>
+        <a href="mailto:hello@example.com" id="cta-email" class="contact-link solid">✉ Email Sales Team</a>
+        <a href="tel:+13133123706" id="cta-phone" class="contact-link outline">☎ +1 (313) 312-3706</a>
         <p class="note">Replace the email and phone number with your official distributor contact details when ready.</p>
       </div>
     </div>
@@ -532,8 +532,13 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
     hero_headline: document.getElementById('hero-headline'),
     hero_description: document.getElementById('hero-description'),
     story_headline: document.getElementById('story-headline'),
-    story_description: document.getElementById('story-description')
+    story_description: document.getElementById('story-description'),
+    cta_headline: document.getElementById('cta-headline'),
+    cta_description: document.getElementById('cta-description')
   };
+
+  var ctaEmail = document.getElementById('cta-email');
+  var ctaPhone = document.getElementById('cta-phone');
 
   function applySettings(rows){
     rows.forEach(function(row){
@@ -546,6 +551,13 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;}
       var textEl = textTargets[row.key];
       if (textEl && row.text_value){
         textEl.textContent = row.text_value;
+      }
+      if (row.key === 'cta_email' && row.text_value && ctaEmail){
+        ctaEmail.href = 'mailto:' + row.text_value;
+      }
+      if (row.key === 'cta_phone' && row.text_value && ctaPhone){
+        ctaPhone.href = 'tel:' + row.text_value.replace(/[^+\d]/g, '');
+        ctaPhone.textContent = '☎ ' + row.text_value;
       }
     });
   }

@@ -6,7 +6,11 @@ const ALLOWED_KEYS = [
   "hero_headline",
   "hero_description",
   "story_headline",
-  "story_description"
+  "story_description",
+  "cta_headline",
+  "cta_description",
+  "cta_email",
+  "cta_phone"
 ];
 
 function supabaseHeaders() {
